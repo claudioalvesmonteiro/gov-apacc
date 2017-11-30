@@ -8,8 +8,8 @@
 # Claudio A. Monteiro                            #
 # claudiomonteirol.a@gmail.com                   #
 #------------------------------------------------#
-# Any question contact the developer             #
-# #UseFreeSoftware                               #
+# Qualquer duvida contate o desenvolvedor        #
+# #UseSoftwareLivre                              #
 #------------------------------------------------#
 
 # instalar pacotes
@@ -18,19 +18,11 @@
 # carregar pacotes
 library(readxl); library(ggplot2)
 
-#
-setwd("~/Research/Governing The Coast (TCC)/Replication Documentation/")
-#setwd("~/Documents/Claudio/R/")
-
 # read data
-apacc_data <- read_excel("~/Research/Governing The Coast (TCC)/Replication Documentation/Analysis Data/Listas PresenÃ§a Conselho APACC.xlsx", 
-                     col_types = c("text", "date", "numeric", 
-                                   "text", "text", "numeric", "numeric", 
-                                   "text", "numeric"))
-library(ggplot2)
+apacc_data <- read_excel("~/Dados/Listas Presença Conselho APACC.xlsx")
 
 # tema para os graficos em ggplot
-theme_arretado<- function (base_size = 12, base_family = "") {
+theme_arretado<- function(base_size = 12, base_family = "") {
   theme_minimal(base_size = base_size, base_family = base_family) %+replace% 
     theme(axis.text.x = element_text(colour= "black",size=11,hjust=.5,vjust=.5,face="plain"),
           axis.text.y = element_text(colour="black",size=11,angle=0,hjust=1,vjust=0,face="plain"), 
