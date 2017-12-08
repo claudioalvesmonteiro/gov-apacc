@@ -1,36 +1,28 @@
-s#------------------------------------------------#
-# GOVERNING A COMMON COAST                       #
+#------------------------------------------------#
+# ASSEMBLEIA NO ATLANTICO BRASILEIRO             #
 #------------------------------------------------#
 # Recife - Pernambuco - Brasil                   #
 #------------------------------------------------#
-# Funda??o Joaquim Nabuco (FUNDAJ)               #
+# Fundacao Joaquim Nabuco (FUNDAJ)               #
 #------------------------------------------------#
 # Claudio A. Monteiro                            #
 # claudiomonteirol.a@gmail.com                   #
 #------------------------------------------------#
-# Any question contact the developer             #
-# #UseFreeSoftware                               #
+# Qualquer duvida contate o desenvolvedor        #
+# #UseSoftwareLivre                              #
 #------------------------------------------------#
 
-# install.packages
-# install.packages(c("readxl", 'ggplot2'))
+# instalar pacotes
+# install.packages(c("readxl", 'ggplot2'), dependencies = T) # isso pode levar um certo tempo
 
-# load packages
-library(readxl)
-library(ggplot2)
-
-#
-setwd("~/Research/Governing The Coast (TCC)/Replication Documentation/")
-#setwd("~/Documents/Claudio/R/")
+# carregar pacotes
+library(readxl); library(ggplot2)
 
 # read data
-apacc_data <- read_excel("~/Research/Governing The Coast (TCC)/Replication Documentation/Analysis Data/Listas Presença Conselho APACC.xlsx", 
-                     col_types = c("text", "date", "numeric", 
-                                   "text", "text", "numeric", "numeric", 
-                                   "text", "numeric"))
-library(ggplot2)
+apacc_data <- read_excel("~/Dados/Listas Presença Conselho APACC.xlsx")
 
-theme_arretado<- function (base_size = 12, base_family = "") {
+# tema para os graficos em ggplot
+theme_arretado<- function(base_size = 12, base_family = "") {
   theme_minimal(base_size = base_size, base_family = base_family) %+replace% 
     theme(axis.text.x = element_text(colour= "black",size=11,hjust=.5,vjust=.5,face="plain"),
           axis.text.y = element_text(colour="black",size=11,angle=0,hjust=1,vjust=0,face="plain"), 
@@ -57,7 +49,7 @@ sex_apacc$Sexo <- factor(sex_apacc$Var1, levels = c(1, 2), labels = c("Homem", "
 # sex plotting 1 #
 bar_sex_apacc <- ggplot(sex_apacc, aes(x = Sexo, y = Freq))+
   geom_bar(stat = "identity", aes(fill = Sexo)) +
-  labs( x ="Sexo", y = "NÃºmero de Representantes") +
+  labs( x ="Sexo", y = "NÃƒÂºmero de Representantes") +
   scale_fill_manual("Sexo", values = c("Homem" = "#325c6c", "Mulher" =  "lightgreen"))+
   geom_label(aes(y = 200,label = sex_apacc$Freq)) +
   theme_arretado()+
@@ -81,14 +73,14 @@ represent_insti <- data.frame(table(apacc_data$entidade_sigla))
 represent_insti <- represent_insti[order(-represent_insti$Freq),]
 
 library(xlsx)
-write.xlsx(represent_insti, file = "instituições_apacc.xlsx")
+write.xlsx(represent_insti, file = "instituiÃ§Ãµes_apacc.xlsx")
 
 represent_insti$Sigla <- factor(represent_insti$Var1, levels = represent_insti$Var1)
 
 
 barra_inst <- ggplot(represent_insti, aes(x = represent_insti$Sigla, y = represent_insti$Freq))+
   geom_bar(stat = "identity", fill = "#2c3b3e") +
-  labs(x = "", y = "Número de Conselheiros", title = "Conselheiros Totais") +
+  labs(x = "", y = "NÃºmero de Conselheiros", title = "Conselheiros Totais") +
   geom_label(label = represent_insti$Freq,
              size = 2.5, color = "black", fontface = "plain") +
   theme_arretado()+
@@ -111,7 +103,7 @@ inst_presen$Sigla <- factor(inst_presen$Var1, levels = inst_presen$Var1)
 barra_inst2 <- ggplot(inst_presen, aes(x = inst_presen$Sigla, y = inst_presen$Freq))+
   geom_bar(stat = "identity", fill = "#2c3b3e") +
   scale_y_continuous(limits = c(0,50))+
-  labs(x = "", y = "Número de Conselheiros", title = "Conselheiros Presentes") +
+  labs(x = "", y = "NÃºmero de Conselheiros", title = "Conselheiros Presentes") +
   geom_label(label = inst_presen$Freq,
              size = 2.5, color = "black", fontface = "plain") +
   theme_arretado()+
@@ -136,7 +128,7 @@ inst_titu$Sigla <- factor(inst_titu$Var1, levels = inst_titu$Var1)
 barra_inst3 <- ggplot(inst_titu, aes(x = inst_titu$Sigla, y = inst_titu$Freq))+
   geom_bar(stat = "identity", fill = "#2c3b3e") +
   scale_y_continuous(limits = c(0,50))+
-  labs(x = "", y = "Número de Conselheiros", title = "Conselheiros Titulares") +
+  labs(x = "", y = "NÃºmero de Conselheiros", title = "Conselheiros Titulares") +
   geom_label(label = inst_titu$Freq,
              size = 2.5, color = "black", fontface = "plain") +
   theme_arretado()+
@@ -156,13 +148,13 @@ ggsave("grid_barrainst.png",grid_barrainst,  width = 11, height = 12)
 
 times_represent <- data.frame(table(apacc_data$reuniao))
 
-times_represent$Reunião <- factor(times_represent$Var1, 
+times_represent$ReuniÃ£o <- factor(times_represent$Var1, 
                                   levels =c("1_posse", "reuniao_2", "reuniao_3",  "reuniao_4",  "reuniao_5",  "reuniao_6",  "reuniao_7", 
                                             "reuniao_8",  "reuniao_9", "reuniao_10", "reuniao_11", "reuniao_12", "reuniao_13", "reuniao_14", 
                                             'reuniao_15', "reuniao_16", "reuniao_17", "reuniao_18", "reuniao_19",   "reuniao_20", "reuniao_21",
                                            "reuniao_22", "reuniao_23"))
 
-times_represent <- times_represent[order(times_represent$Reunião),]
+times_represent <- times_represent[order(times_represent$ReuniÃ£o),]
 
 theme_arretado<- function (base_size = 12, base_family = "") {
   theme_minimal(base_size = base_size, base_family = base_family) %+replace% 
@@ -180,10 +172,10 @@ theme_arretado<- function (base_size = 12, base_family = "") {
 }
 
 
-ipa_plot1 <- ggplot(data = times_represent, aes(x = Reunião, y = times_represent$Freq, group = 1))+
+ipa_plot1 <- ggplot(data = times_represent, aes(x = ReuniÃ£o, y = times_represent$Freq, group = 1))+
   geom_line(size = 1, colour = "#2c3b3e")+
   scale_y_continuous(limits= c(0, 100))+
-  labs(x = "", title = "",y = "NÃºmero de Representantes")+
+  labs(x = "", title = "",y = "NÃƒÂºmero de Representantes")+
   geom_text(aes( angle = 20 , vjust = -0.9, hjust = 0.3, fontface = "plain"), label = times_represent$Freq, size = 4)+
   theme_arretado() 
 ipa_plot1
@@ -209,7 +201,7 @@ represent_city$Municipio <- factor(represent_city$Municipio, levels = represent_
 barra_inst1 <- ggplot(represent_city, aes(x = represent_city$Municipio, y = represent_city$Freq))+
   geom_bar(stat = "identity", fill = "#2c3b3e") +
   #scale_y_continuous(limits = c(0,50))+
-  labs(x = "", y = "Número de Representantes", title = "") +
+  labs(x = "", y = "NÃºmero de Representantes", title = "") +
   geom_label(label = represent_city$Freq,
              size = 4, color = "black", fontface = "plain") +
   theme_arretado()+
