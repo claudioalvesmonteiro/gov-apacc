@@ -16,9 +16,9 @@
 # carregar pacote
 library(RQDA)
 
-
 # executar RQDA
 RQDA()
+
 
 
 
