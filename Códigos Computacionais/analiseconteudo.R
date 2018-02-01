@@ -19,6 +19,23 @@ library(RQDA)
 # executar RQDA
 RQDA()
 
+# Abra o projeto no RQDA para executar os demais codigos
+
+# visualizar a contagem de cada codigo
+x <- summaryCodings()
+x$NumOfCoding
+
+# visualizar infos sobre cada codificacao
+getCodingTable()
+
+# relacao entre dois codigos
+?relation
+
+
+relation(1, 2)
+
+
+
 
 
 
