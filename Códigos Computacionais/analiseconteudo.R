@@ -62,20 +62,6 @@ ggplot(cont_cod_tema, aes(x = nomes_temas, y = prop_tema))+
   labs(y = "Propor豫o", x = "", title = "") +
   coord_flip()
 
-#===========================
-# relacao entre codigos
-
-# funcao para relacionar codigos
-?crossCodes
-
-# qual a relacao entre cat_CONFLITO (cid57), tema_FISCALIZA플OeMONITOR (cid59) e eduardo_machado (cid29)
-crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado"), data = coding_table, relation = "proximity")
-crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado"), data = coding_table, relation = "overlap")
-crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado"), data = coding_table, relation = "inclusion")
-crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado"), data = coding_table, relation = "exact")
-
-crossCodes(codeList = c("cat_CONFLITO", "TESTE_pesca"), data = coding_table, relation = "exact")
-
 #============================#
 # Variacao de codigos no tempo
 
@@ -133,7 +119,46 @@ RQDAQuery("select name from source where status=1")
 
 
 
+#===========================#
+# RELACAO ENTRE CODIGOS
+# ANALISE DE REDES
+#========================#
 
+# funcao para relacionar codigos
+?crossCodes
+
+# qual a relacao entre cat_CONFLITO (cid57), tema_FISCALIZA플OeMONITOR (cid59) e eduardo_machado (cid29)
+prox1_matrix <- crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado", "cat_COOPERA플O", "beatriz_mesquita", "tema_PESCA", "TESTE_pesca"), data = coding_table, relation = "proximity")
+crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado"), data = coding_table, relation = "overlap")
+crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado"), data = coding_table, relation = "inclusion")
+crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado"), data = coding_table, relation = "exact")
+
+crossCodes(codeList = c("cat_CONFLITO", "TESTE_pesca"), data = coding_table, relation = "exact")
+
+#========== redes =============#
+
+prox1_matrix<- as.matrix(prox1_matrix)
+colnames(prox1_matrix) <- c("cat_COOPERA플O","eduardo_machado", "cat_CONFLITO", "tema_FISCALIZA플OeMONITORAMENTO", "tema_PESCA", "beatriz_mesquita", "TESTE_pesca")
+rownames(prox1_matrix) <- c("cat_COOPERA플O","eduardo_machado", "cat_CONFLITO", "tema_FISCALIZA플OeMONITORAMENTO", "tema_PESCA", "beatriz_mesquita", "TESTE_pesca")
+prox1_matrix[is.na(prox1_matrix)] <- 0
+
+# Libraries
+install.packages(c("GGally", "network", "sna"))
+library(GGally)
+library(network)
+library(sna)
+library(ggplot2)
+
+# Create data
+set.seed(10)
+data=matrix(sample(0:2, 25, replace=TRUE), nrow=5)
+colnames(data)=rownames(data)=LETTERS[1:5]
+
+# Make a network object
+my_net = network(prox1_matrix, directed = FALSE, matrix.type="adjacency")
+
+# Plot it
+ggnet2(my_net, label = TRUE)
 
 
 
