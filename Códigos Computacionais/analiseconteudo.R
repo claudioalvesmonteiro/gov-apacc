@@ -37,11 +37,57 @@ coding_table <- getCodingTable()
 
 #================================#
 # Analise dos temas em debate
+<<<<<<< HEAD
 
 # selecionar contagem de temas
 cont_cod_data <- mutate(cont_cod_data, tema = 0)
 cont_cod_data$tema[str_detect(cont_cod_data$Var1, "tema_")] <- 1
 cont_cod_tema <- cont_cod_data[cont_cod_data$tema == 1,]
+=======
+
+# selecionar contagem de temas
+cont_cod_data <- mutate(cont_cod_data, tema = 0)
+cont_cod_data$tema[str_detect(cont_cod_data$Var1, "tema_")] <- 1
+cont_cod_tema <- cont_cod_data[cont_cod_data$tema == 1,]
+
+# calcular proporcao e arredondar
+cont_cod_tema <- mutate(cont_cod_tema, prop_tema = (Freq / sum(Freq))*100 )
+cont_cod_tema$prop_tema2 <- paste(round(cont_cod_tema$prop_tema, 2), "%", sep="")
+
+# renomear colunas
+cont_cod_tema <- mutate(cont_cod_tema, nomes_temas = Var1)
+cont_cod_tema$nomes_temas <- c("Educação Socioambiental", "Fiscalização e Monitoramento", "Institucional",  "Manguezal", "Pesca",
+                                "Pesquisa", "Plano de Manejo", "Recursos Financeiros", "Turismo", "Zoneamento")
+
+# ordenar
+cont_cod_tema$nomes_temas <- factor(cont_cod_tema$nomes_temas, levels = cont_cod_tema$nomes_temas[order(cont_cod_tema$prop_tema)])
+
+# visualizar graficamente
+ggplot(cont_cod_tema, aes(x = nomes_temas, y = prop_tema))+
+  geom_bar(stat = "identity", fill = "#15041c") +
+  geom_label(aes(x = nomes_temas, y = prop_tema, label = prop_tema2))+
+  labs(y = "Proporção", x = "", title = "") +
+  coord_flip()
+
+#===========================
+# relacao entre codigos
+
+# funcao para relacionar codigos
+?crossCodes
+
+# qual a relacao entre cat_CONFLITO (cid57), tema_FISCALIZAÇÃOeMONITOR (cid59) e eduardo_machado (cid29)
+crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZAÇÃOeMONITOR", "eduardo_machado"), data = coding_table, relation = "proximity")
+crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZAÇÃOeMONITOR", "eduardo_machado"), data = coding_table, relation = "overlap")
+crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZAÇÃOeMONITOR", "eduardo_machado"), data = coding_table, relation = "inclusion")
+crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZAÇÃOeMONITOR", "eduardo_machado"), data = coding_table, relation = "exact")
+
+
+
+
+
+#=====================#
+# ANNOTATIONS
+>>>>>>> 517cb81f46a16c6f7b49b7f3fc4128725fc55467
 
 # calcular proporcao e arredondar
 cont_cod_tema <- mutate(cont_cod_tema, prop_tema = (Freq / sum(Freq))*100 )
@@ -96,7 +142,11 @@ casesCodedByOr(cid =c(18, 19, 20))
 
 
 # ATENCAO ESSE AQUI 
+<<<<<<< HEAD
 x1 <- getCodingsByOne(2, fid=NULL, codingTable=c("coding"))
+=======
+x1 <- getCodingsByOne(57, fid=NULL, codingTable=c("coding"))
+>>>>>>> 517cb81f46a16c6f7b49b7f3fc4128725fc55467
 View(x1)
 
 # visualizar ids dos arquivos
