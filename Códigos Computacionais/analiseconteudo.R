@@ -13,6 +13,9 @@
 # #UseFreeSoftware                               #
 #------------------------------------------------#
 
+#
+install.packages("RQDA", dependencies = T)
+
 # carregar pacote
 library(RQDA)
 
