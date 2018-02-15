@@ -263,7 +263,12 @@ forceNetwork(
 )
 
 
+fun1 <- function(x){
+if(x > 10) 
+  print("Opa")
+  else
+    print("ent")
+}
 
-
-
+fun1(1300)
 
