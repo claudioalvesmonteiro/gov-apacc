@@ -8,21 +8,13 @@
 #------------------------------------------------#
 # Claudio A. Monteiro                            #
 # claudiomonteirol.a@gmail.com                   #
-#------------------------------------------------#
-# Any question contact the developer             #
-# #UseFreeSoftware                               #
-#------------------------------------------------#
+#================================================#
 
-#
-install.packages("RQDA", dependencies = T)
-
-# carregar pacote
-library(RQDA)
-
-# carregar pacotes
+#install.packages(c("RQDA","GGally", "network", "sna"), dependencies = T)
+library(GGally); library(network); library(sna); library(ggplot2); library(RQDA)
 library(RQDA); library(dplyr); library(stringr); library(ggplot2)
 
-# executar RQDA
+# executar pacote RQDA (p/ analise de conteudo)
 RQDA()
 
 # *Abra o projeto no RQDA para executar os demais codigos*
@@ -191,13 +183,6 @@ prox1_matrix<- as.matrix(prox1_matrix)
 colnames(prox1_matrix) <- c("cat_COOPERA플O","eduardo_machado", "cat_CONFLITO", "tema_FISCALIZA플OeMONITORAMENTO", "tema_PESCA", "beatriz_mesquita", "TESTE_pesca")
 rownames(prox1_matrix) <- c("cat_COOPERA플O","eduardo_machado", "cat_CONFLITO", "tema_FISCALIZA플OeMONITORAMENTO", "tema_PESCA", "beatriz_mesquita", "TESTE_pesca")
 prox1_matrix[is.na(prox1_matrix)] <- 0
-
-# Libraries
-install.packages(c("GGally", "network", "sna"))
-library(GGally)
-library(network)
-library(sna)
-library(ggplot2)
 
 # Create data
 set.seed(10)
