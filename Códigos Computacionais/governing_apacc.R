@@ -19,7 +19,7 @@
 library(readxl); library(ggplot2)
 
 # read data
-apacc_data <- read_excel("~/Dados/Listas Presença Conselho APACC.xlsx")
+apacc_data <- read_excel("Dados/Listas Presença Conselho APACC.xlsx")
 
 # tema para os graficos em ggplot
 theme_arretado<- function(base_size = 12, base_family = "") {
@@ -37,33 +37,36 @@ theme_arretado<- function(base_size = 12, base_family = "") {
           axis.line = element_line(size = 1, colour = "grey70"))
 }
 
-#--------------------------------#
-# Sex representnation analysis
+#==============================#
+# Representacao por genero
 
+# selecionar apenas consel. presentes
+sex_apacc1 <- apacc_data[apacc_data$presente == 1,]
+  
 # count men woman
-sex_apacc <- as.data.frame(table(apacc_data$sexo))
+sex_apacc1 <- as.data.frame(table(sex_apacc1$sexo))
+sex_apacc2 <- as.data.frame(table(apacc_data$sexo))
 
 # label factor
-sex_apacc$Sexo <- factor(sex_apacc$Var1, levels = c(1, 2), labels = c("Homem", "Mulher")) 
+sex_apacc1$Sexo <- factor(sex_apacc1$Var1, levels = c(1, 2), labels = c("Homem", "Mulher")) 
+sex_apacc2$Sexo <- factor(sex_apacc2$Var1, levels = c(1, 2), labels = c("Homem", "Mulher")) 
 
 # sex plotting 1 #
-bar_sex_apacc <- ggplot(sex_apacc, aes(x = Sexo, y = Freq))+
+ggplot(sex_apacc2, aes(x = Sexo, y = Freq))+
   geom_bar(stat = "identity", aes(fill = Sexo)) +
-  labs( x ="Sexo", y = "NÃƒÂºmero de Representantes") +
+  labs( x ="Sexo", y = "Prop. de Consel. Presentes") +
   scale_fill_manual("Sexo", values = c("Homem" = "#325c6c", "Mulher" =  "lightgreen"))+
-  geom_label(aes(y = 200,label = sex_apacc$Freq)) +
+  geom_label(aes(y = 200,label = sex_apacc2$Freq)) +
   theme_arretado()+
   guides(fill = F)
-bar_sex_apacc
 
-#ggsave("barapacc_sex.png", bar_sex_apacc, width = 4, height =5.5, units = "in")
+ggsave("barapacc_sex.png", width = 4, height =5.5, units = "in")
 
 #----------------#
 # Institutions 
 #----------------#
 
-apacc_data$entidade_sigla <- toupper(apacc_data$entidade_sigla)
-apacc_data$entidade_sigla <- (as.factor(apacc_data$entidade_sigla))
+apacc_data$entidade_sigla <- as.factor(toupper(apacc_data$entidade_sigla))
 
 #==== based on total count ====#
 
@@ -208,5 +211,27 @@ barra_inst1 <- ggplot(represent_city, aes(x = represent_city$Municipio, y = repr
   coord_flip()
 barra_inst1
 ggsave("repre_city.png", barra_inst1, width = 8, height = 5, units = "in")
+
+
+#================================================#
+# PROP. DE FALA -  MANIPULACAO DE DADOS
+#================================================#
+
+consel_insti <- apacc_data[!duplicated(apacc_data$nome_consel),c(4:6)]
+
+write.csv(consel_insti, file = "Resultados/consel_instituicoes.csv")
+
+#* Apos salvar essa banco, foi feita uma categorizacao das instituicoes com base na reuniao 18,
+#* em que houve eleicoes.
+
+
+
+
+
+
+
+
+
+
 
 
