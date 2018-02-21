@@ -21,8 +21,8 @@ RQDA()
 
 # *Abra o projeto no RQDA para executar os demais codigos*
 
-#==================================#
-# Selecao e manipulacao dos dados
+#==========================#
+# MANIPULACAO DOS DADOS
 
 # visualizar a contagem de cada codigo
 sumario_cod <- summaryCodings()
@@ -34,7 +34,8 @@ cont_cod_data <- data.frame(sumario_cod$NumOfCoding)
 coding_table <- getCodingTable()
 
 #================================#
-# Analise dos temas em debate
+# Analise dos temas em debate    #
+#================================# 
 
 # selecionar contagem de temas
 cont_cod_data <- mutate(cont_cod_data, tema = 0)
@@ -65,46 +66,10 @@ ggplot(cont_cod_tema, aes(x = nomes_temas, y = prop_tema))+
   labs(y = "Propor豫o", x = "", title = "") +
   coord_flip()
 
-#===========================
-# relacao entre codigos
 
-# funcao para relacionar codigos
-?crossCodes
-
-# qual a relacao entre cat_CONFLITO (cid57), tema_FISCALIZA플OeMONITOR (cid59) e eduardo_machado (cid29)
-crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado"), data = coding_table, relation = "proximity")
-crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado"), data = coding_table, relation = "overlap")
-crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado"), data = coding_table, relation = "inclusion")
-crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado"), data = coding_table, relation = "exact")
-
-
-
-
-
-#=====================#
-# ANNOTATIONS
-
-# calcular proporcao e arredondar
-cont_cod_tema <- mutate(cont_cod_tema, prop_tema = (Freq / sum(Freq))*100 )
-cont_cod_tema$prop_tema2 <- paste(round(cont_cod_tema$prop_tema, 2), "%", sep="")
-
-# renomear colunas
-cont_cod_tema <- mutate(cont_cod_tema, nomes_temas = Var1)
-cont_cod_tema$nomes_temas <- c("Educa豫o Socioambiental", "Fiscaliza豫o e Monitoramento", "Institucional",  "Manguezal", "Pesca",
-                                "Pesquisa", "Plano de Manejo", "Recursos Financeiros", "Turismo", "Zoneamento")
-
-# ordenar
-cont_cod_tema$nomes_temas <- factor(cont_cod_tema$nomes_temas, levels = cont_cod_tema$nomes_temas[order(cont_cod_tema$prop_tema)])
-
-# visualizar graficamente
-ggplot(cont_cod_tema, aes(x = nomes_temas, y = prop_tema))+
-  geom_bar(stat = "identity", fill = "#15041c") +
-  geom_label(aes(x = nomes_temas, y = prop_tema, label = prop_tema2))+
-  labs(y = "Propor豫o", x = "", title = "") +
-  coord_flip()
-
-#============================#
-# Variacao de codigos no tempo
+#============================================#
+# Variacao de codigos nos arquivos (tempo)   # **EM CONSTRUCAO**
+#============================================#
 
 # Return a data frame which indicates what codes are associated with each file.
 #The result is a data frame. Each row represents one file, and each variable represents one code. If a
@@ -114,92 +79,198 @@ filesByCodes(codingTable = c("coding", "coding2"))
 # Get files coded by specific codes, by specifying the code IDs
 filesCodedByAnd(cid = 24, codingTable=c("coding"))
 
-#==============================================#
-# Codificacao automatizada por palavra chave
-# *ADIANTO"
-
-# cid 85 = TESTE_pesca
-codingBySearch("pesca",fid=getFileIds(),cid=85)
-codingBySearch("pescador",fid=getFileIds(),cid=85)
-
-# cid 85 = TESTE_pesca
-codingBySearch("turismo",fid=getFileIds(),cid=86)
-codingBySearch("turis",fid=getFileIds(),cid=86)  # melhor
-
-
-#=====================#
-# ANNOTATIONS
-
-#  Get cases coded by specific codes, by specifying the code IDs.
-casesCodedByOr(cid =c(18, 19, 20))
-
-
-
-
-# ATENCAO ESSE AQUI 
-x1 <- getCodingsByOne(2, fid=NULL, codingTable=c("coding"))
-
-x1 <- getCodingsByOne(57, fid=NULL, codingTable=c("coding"))
-
-View(x1)
-
 # visualizar ids dos arquivos
 getFileIds()
 
 # visualizar nomes dos arquivos
 getFileNames(fid = getFileIds())
 
-# 
-c1 <- subset(coding_table,cid==57)
-c1 <- subset(coding_table,cid==24)
+#==============================================#
+# Codificacao automatizada por palavra chave
+#==============================================#
+
+# cid 85 = TESTE_pesca # codingBySearch("pesc",fid=getFileIds(),cid=85)
+# cid 86 = TESTE_turismo # codingBySearch("turis",fid=getFileIds(),cid=86)  
+# cid 87 = TESTE_pesquisa # codingBySearch("pesq",fid=getFileIds(),cid=87)
+
+# codificar nomes dos conselheiros
+codingBySearch("Mauro Maida",fid=getFileIds(),cid=26)
+# cid 87 = TESTE_pesquisa # codingBySearch("pesq",fid=getFileIds(),cid=87)
+# cid 87 = TESTE_pesquisa # codingBySearch("pesq",fid=getFileIds(),cid=87)
 
 
-#
-RQDATables()
-RQDA
+#---- analise ----#
+
+# selecionar codigos e juntar bases
+debate_area85 <- getCodingsByOne(85, fid=NULL, codingTable=c("coding"))
+debate_area86 <- getCodingsByOne(86, fid=NULL, codingTable=c("coding"))
+debate_area87 <- getCodingsByOne(87, fid=NULL, codingTable=c("coding"))
+debate_area <- rbind(debate_area85, debate_area86, debate_area87)
+
+# contagem
+debate_area_cont <- data.frame(table(debate_area$cid))
+
+# nomear codigos
+debate_area_cont$nomes <- c("Pesca", "Turismo", "Pesquisa")
+
+# calcular proporcao e arredondar
+debate_area_cont <- mutate(debate_area_cont, prop_tema = (Freq / sum(Freq))*100 )
+debate_area_cont$prop_tema2 <- paste(round(debate_area_cont$prop_tema, 2), "%", sep="")
+
+# visualizar graficamente
+ggplot(debate_area_cont, aes(x = nomes, y = prop_tema))+
+  geom_bar(stat = "identity", fill = "#15041c") +
+  geom_label(aes(x = nomes, y = prop_tema, label = prop_tema2))+
+  labs(y = "Porcentagem", x = "", title = "") +
+  coord_flip()
 
 
-RQDAQuery("select name from source where status=1")
-
-
-
-#===========================#
-# RELACAO ENTRE CODIGOS
-# ANALISE DE REDES
-#========================#
+#======================================#
+#       RELACAO ENTRE CODIGOS          #
+#======================================#
 
 # funcao para relacionar codigos
 ?crossCodes
 
-# qual a relacao entre cat_CONFLITO (cid57), tema_FISCALIZA플OeMONITOR (cid59) e eduardo_machado (cid29)
-prox1_matrix <- crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado", "cat_COOPERA플O", "beatriz_mesquita", "tema_PESCA", "TESTE_pesca"), data = coding_table, relation = "proximity")
-crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado"), data = coding_table, relation = "overlap")
-crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado"), data = coding_table, relation = "inclusion")
-crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado"), data = coding_table, relation = "exact")
+#=============================#
+# codigos especificos         #
+#=============================#
 
-crossCodes(codeList = c("cat_CONFLITO", "TESTE_pesca"), data = coding_table, relation = "exact")
+prox1_matrix <- crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado", 
+                                        "cat_COOPERA플O", "beatriz_mesquita", "tema_PESCA"), 
+                                        data = coding_table, relation = "proximity")
 
-#========== redes =============#
+# transformar matrix em dataframe
+data_flow <- as.data.frame(as.table(prox1_matrix))
 
-prox1_matrix<- as.matrix(prox1_matrix)
-colnames(prox1_matrix) <- c("cat_COOPERA플O","eduardo_machado", "cat_CONFLITO", "tema_FISCALIZA플OeMONITORAMENTO", "tema_PESCA", "beatriz_mesquita", "TESTE_pesca")
-rownames(prox1_matrix) <- c("cat_COOPERA플O","eduardo_machado", "cat_CONFLITO", "tema_FISCALIZA플OeMONITORAMENTO", "tema_PESCA", "beatriz_mesquita", "TESTE_pesca")
-prox1_matrix[is.na(prox1_matrix)] <- 0
+# transformar coluna 1 em numeric
+cod_seq <- regmatches(data_flow$Var1, gregexpr("[[:digit:]]+", data_flow$Var1))
+data_flow$Var1 <- as.numeric(unlist(cod_seq))
 
-# Create data
-set.seed(10)
-data=matrix(sample(0:2, 25, replace=TRUE), nrow=5)
-colnames(data)=rownames(data)=LETTERS[1:5]
+# definir nomes dos nodes
+nomes <- data.frame(nome_nod = c("CONFLITO", "FISCALeMONITOR", "Eduardo Machado", 
+                   "COOPERA플O", "Beatriz Mesquita", "PESCA_tema"))
 
-# Make a network object
-my_net = network(prox1_matrix, directed = FALSE, matrix.type="adjacency")
+rownames(nomes) <- c(57, 59, 29, 18, 69, 64)
+nomes$nod_cod <-  c(57, 59, 29, 18, 69, 64)
+nomes$grupos <- c("Categoria de Analise", "Tema de Debate", "Conselheiro(a)", "Categoria de Analise", "Conselheiro(a)", "Tema de Debate")
 
-# Plot it
-ggnet2(my_net, label = TRUE)
+# limpar base
+data_flow <- mutate(data_flow, clean = ifelse(Var1 == Var2 | is.na(Freq), 1, 0))
+data_flow <- data_flow[data_flow$clean == 0,]
+data_flow$Var2 <- as.numeric(as.character(data_flow$Var2))
+
+# criar IDs
+data_flow$IDsource = match(data_flow$Var1, nomes$nod_cod)-1 
+data_flow$IDtarget = match(data_flow$Var2, nomes$nod_cod)-1
+
+# Make the Network
+# https://www.r-graph-gallery.com/253-custom-network-chart-networkd3/7
+# https://christophergandrud.github.io/networkD3/
+
+sankeyNetwork(Links = data_flow, Nodes = nomes,
+              Source = "IDsource", Target = "IDtarget",
+              Value = "Freq", NodeID = "nome_nod", 
+              fontSize = 12, nodeWidth = 30
+              )
+
+forceNetwork(
+  data_flow, 
+  Nodes = nomes,
+  Source = "IDsource", 
+  Target = "IDtarget",
+  Value = "Freq", 
+  NodeID = "nome_nod", 
+  Group = "grupos",
+  
+  linkDistance = 200,   
+  opacity = 0.7,
+  legend = T,  
+  height = 700,                                               
+  width = 700,
+  zoom = TRUE ,
+  fontSize = 17,                                                    
+  fontFamily = "serif"
+  )
 
 
+# From these flows we need to create a node data frame: it lists every entities involved in the flow
+# nodes=data.frame(name=c(as.character(links$source), as.character(links$target)) %>% unique())
 
 
+prox1_matrix <- crossCodes(
+  codeList = c("cat_CONFLITO", "tema_FISCALIZA플OeMONITOR", "eduardo_machado", "cat_COOPERA플O", "beatriz_mesquita", "tema_PESCA"), 
+  data = coding_table, relation = "proximity")
+
+#=============================#
+# codigos flow complelto      #
+#=============================#
+
+# selecionar codes e code names
+codes <- coding_table[!duplicated(coding_table$cid),]
+codes <- codes[,c(2, 4)]
+  
+# matriz de inclusao entre codigos
+prox2_matrix <- crossCodes(
+  codeList = codes$codename,
+    data = coding_table, relation = "inclusion")
+
+# transformar matriz em dataframe
+data_flow <- as.data.frame(as.table(prox2_matrix))
+
+# transformar coluna 1 em numeric
+cod_seq <- regmatches(data_flow$Var1, gregexpr("[[:digit:]]+", data_flow$Var1))
+data_flow$Var1 <- as.numeric(unlist(cod_seq))
+
+# limpar base
+data_flow <- mutate(data_flow, clean = ifelse(Var1 == Var2 | is.na(Freq), 1, 0))
+data_flow <- data_flow[data_flow$clean == 0,]
+data_flow$Var2 <- as.numeric(as.character(data_flow$Var2))
+
+# criar IDs
+data_flow$IDsource = match(data_flow$Var1, codes$cid)-1 
+data_flow$IDtarget = match(data_flow$Var2, codes$cid)-1
+
+# Make the Network
+# https://www.r-graph-gallery.com/253-custom-network-chart-networkd3/7
+# https://christophergandrud.github.io/networkD3/
+
+sankeyNetwork(Links = data_flow, 
+              Nodes = codes,
+              Source = "IDsource", 
+              Target = "IDtarget",
+              Value = "Freq", 
+              NodeID = "codename", 
+              fontSize = 12, 
+              nodeWidth = 30
+)
+
+forceNetwork(
+  data_flow, 
+  Nodes = codes,
+  Source = "IDsource", 
+  Target = "IDtarget",
+  Value = "Freq", 
+  NodeID = "codename", 
+  Group = "codename",
+  
+  linkDistance = 200,   
+  opacity = 0.7,
+  legend = F,  
+  height = 700,                                               
+  width = 700,
+  zoom = TRUE ,
+  fontSize = 17,                                                    
+  fontFamily = "serif"
+)
 
 
+fun1 <- function(x){
+if(x > 10) 
+  print("Opa")
+  else
+    print("ent")
+}
+
+fun1(1300)
 
