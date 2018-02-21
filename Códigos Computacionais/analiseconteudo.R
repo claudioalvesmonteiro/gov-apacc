@@ -11,6 +11,8 @@
 #================================================#
 
 #install.packages(c("RQDA","GGally", "network", "sna"), dependencies = T)
+
+# carregar pacotes
 library(GGally); library(network); library(sna); library(ggplot2); library(RQDA)
 library(RQDA); library(dplyr); library(stringr); library(ggplot2)
 
