@@ -21,8 +21,8 @@ RQDA()
 
 # *Abra o projeto no RQDA para executar os demais codigos*
 
-#==========================#
-# MANIPULACAO DOS DADOS
+#==================================#
+# CAPTURA DOS DADOS DA CODIFICACAO
 
 # visualizar a contagem de cada codigo
 sumario_cod <- summaryCodings()
@@ -125,44 +125,89 @@ ggplot(debate_area_cont, aes(x = nomes, y = prop_tema))+
   coord_flip()
 
 
-#======================================#
-#       RELACAO ENTRE CODIGOS          #
-#======================================#
+#=================================================#
+#             RELACAO ENTRE CODIGOS               #
+#=================================================#
 
 # funcao para relacionar codigos
 ?crossCodes
 
-#=============================#
-# codigos especificos         #
-#=============================#
+#======================================#
+# TEMAS X CATEGORIAS DE ANALISE        #
+#======================================#
 
-prox1_matrix <- crossCodes(codeList = c("cat_CONFLITO", "tema_FISCALIZAÇÃOeMONITOR", "eduardo_machado", 
-                                        "cat_COOPERAÇÃO", "beatriz_mesquita", "tema_PESCA"), 
-                                        data = coding_table, relation = "proximity")
+# selecionar codigos de temas e categorias
+crosscod1 <- c(as.character(cont_cod_data$Var1[str_detect(cont_cod_data$Var1, "tema_")]),
+as.character(cont_cod_data$Var1[str_detect(cont_cod_data$Var1, "cat_")]))
+
+prox1_matrix <- crossCodes(codeList = crosscod1, 
+                           data = coding_table, 
+                           relation = "exact")
 
 # transformar matrix em dataframe
-data_flow <- as.data.frame(as.table(prox1_matrix))
+data_flow <- data.frame(as.table(prox1_matrix))
 
-# transformar coluna 1 em numeric
+# capturar numero dos codigos
 cod_seq <- regmatches(data_flow$Var1, gregexpr("[[:digit:]]+", data_flow$Var1))
-data_flow$Var1 <- as.numeric(unlist(cod_seq))
+data_flow$nod_cod <- as.numeric(unlist(cod_seq))
+
+# transformar variaveis
+data_flow$Var2 <- as.numeric(as.character(data_flow$Var2))
+data_flow$Var1 <- as.character(data_flow$Var1)
 
 # definir nomes dos nodes
-nomes <- data.frame(nome_nod = c("CONFLITO", "FISCALeMONITOR", "Eduardo Machado", 
-                   "COOPERAÇÃO", "Beatriz Mesquita", "PESCA_tema"))
-
-rownames(nomes) <- c(57, 59, 29, 18, 69, 64)
-nomes$nod_cod <-  c(57, 59, 29, 18, 69, 64)
-nomes$grupos <- c("Categoria de Analise", "Tema de Debate", "Conselheiro(a)", "Categoria de Analise", "Conselheiro(a)", "Tema de Debate")
+nomes <- data.frame(nome_nod = crosscod1)
+nomes$nome_nod <- as.character(nomes$nome_nod)
+  
+flow_unique <- data_flow[!duplicated(data_flow$Var1),]
 
 # limpar base
-data_flow <- mutate(data_flow, clean = ifelse(Var1 == Var2 | is.na(Freq), 1, 0))
+data_flow <- mutate(data_flow, clean = ifelse(Var2 == nod_cod | is.na(Freq), 1, 0))
 data_flow <- data_flow[data_flow$clean == 0,]
-data_flow$Var2 <- as.numeric(as.character(data_flow$Var2))
+
+# function to create merge string based on similarity
+best_match= function(string_vector,string_replacement){
+  library(stringi)
+  s<-string_replacement %>% 
+    purrr::map_int(~{
+      .x %>% 
+        RecordLinkage::levenshteinSim(string_vector) %>%
+        match(max(.),.)
+    })
+  string_vector[s] = string_replacement
+  return(string_vector)
+}
+
+flow_unique$nome_nod <- best_match(flow_unique$Var1, nomes$nome_nod)
+
+# mergir nome e numero dos codigos
+nomes <- merge(flow_unique, nomes, by = "nome_nod")
+
+# definir grupos
+nomes <- mutate(nomes, grupos = "")
+nomes$grupos[str_detect(nomes$nome_nod, "cat_")] <- "Categoria de Análise" 
+nomes$grupos[str_detect(nomes$nome_nod, "tema_")] <- "Tema de Debate" 
 
 # criar IDs
-data_flow$IDsource = match(data_flow$Var1, nomes$nod_cod)-1 
+data_flow$IDsource = match(data_flow$nod_cod, nomes$nod_cod)-1 
 data_flow$IDtarget = match(data_flow$Var2, nomes$nod_cod)-1
+
+# selecionar relacoes entre temas e codigos ##
+data_flow <- mutate(data_flow, IN = "")
+data_flow$IN[str_detect(data_flow$Var1, "tema_")] <- "TEMA" 
+data_flow$IN[str_detect(data_flow$Var1, "cat_")] <- "CAT" 
+
+data_flow <- mutate(data_flow, OUT = "")
+paste_cat <- nomes$nod_cod[str_detect(nomes$Var1, "cat_")]
+paste_tema <- nomes$nod_cod[str_detect(nomes$Var1, "tema_")]
+data_flow$OUT[str_detect(data_flow$Var2, paste(paste_cat, collapse = '|'))] <- "CAT"
+data_flow$OUT[str_detect(data_flow$Var2, paste(paste_tema, collapse = '|'))] <- "TEMA"
+
+cod_nome_in <- data_flow[,c("nod_cod", "IN")]
+
+str_detect(data_flow$Var2, "st\\.|ste\\.", "st")
+
+test <- merge(data_flow$Var2)
 
 # Make the Network
 # https://www.r-graph-gallery.com/253-custom-network-chart-networkd3/7
@@ -171,7 +216,8 @@ data_flow$IDtarget = match(data_flow$Var2, nomes$nod_cod)-1
 sankeyNetwork(Links = data_flow, Nodes = nomes,
               Source = "IDsource", Target = "IDtarget",
               Value = "Freq", NodeID = "nome_nod", 
-              fontSize = 12, nodeWidth = 30
+              fontSize = 12, nodeWidth = 30,
+              NodeGroup = "grupos"
               )
 
 forceNetwork(
@@ -273,4 +319,6 @@ if(x > 10)
 }
 
 fun1(1300)
+
+
 
