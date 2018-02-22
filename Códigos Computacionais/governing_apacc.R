@@ -57,7 +57,7 @@ ggplot(sex_apacc2, aes(x = Sexo, y = Freq))+
   theme_arretado()+
   guides(fill = F)
 
-ggsave("barapacc_sex.png", width = 4, height =5.5, units = "in")
+ggsave("Resultados/barapacc_sex.png", width = 4, height =5.5, units = "in")
 
 #=====================================#
 #      ANALISE DAS INSTITUICOES       #
@@ -93,7 +93,7 @@ rep_total_cat1$Category <- factor(rep_total_cat1$Category, levels = rep_total_ca
 # grafico
 ggplot(rep_total_cat1, aes(x = rep_total_cat1$Category, y = rep_total_cat1$x))+
   geom_bar(stat = "identity", fill = "#2c3b3e") +
-  labs(x = "", y = "Número de Conselheiros(as)", title = "Representação por Categoria 1") +
+  labs(x = "", y = "Número de Conselheiros(as)", title = "Representação Total por Categoria 1") +
   geom_label(label = rep_total_cat1$x,size = 2.5, color = "black", fontface = "plain") +
   theme_arretado()+
   coord_flip()
@@ -109,7 +109,7 @@ rep_total_cat2$Category <- factor(rep_total_cat2$Category, levels = rep_total_ca
 # grafico
 ggplot(rep_total_cat2, aes(x = rep_total_cat2$Category, y = rep_total_cat2$x))+
   geom_bar(stat = "identity", fill = "#2c3b3e") +
-  labs(x = "", y = "Número de Conselheiros(as)", title = "Representação por Categoria 1") +
+  labs(x = "", y = "Número de Conselheiros(as)", title = "Representação Total por Categoria 2") +
   geom_label(label = rep_total_cat2$x,size = 2.5, color = "black", fontface = "plain") +
   theme_arretado()+
   coord_flip()
@@ -136,11 +136,10 @@ presenca_cat1$Category <- factor(presenca_cat1$Category, levels = presenca_cat1$
 # grafico
 ggplot(presenca_cat1, aes(x = presenca_cat1$Category, y = presenca_cat1$x))+
   geom_bar(stat = "identity", fill = "#2c3b3e") +
-  labs(x = "", y = "Número de Conselheiros(as)", title = "Presença nas Reuniões por Categoria 1") +
+  labs(x = "", y = "Conselheiros(as) Presentes", title = "Presença nas Reuniões por Categoria 1") +
   geom_label(label = presenca_cat1$x,size = 2.5, color = "black", fontface = "plain") +
-  theme_arretado()+
-  coord_flip()
-ggsave("Resultados/barra_pres_insti_cat1.png", width = 10, height = 4, units = "in")
+  theme_arretado()
+ggsave("Resultados/barra_pres_insti_cat1.png", width = 4, height = 6, units = "in")
 
 #==== somar representacao com base na categoria 2 ====#
 presenca_cat2 <- aggregate(presenca_cat$Freq, by=list(Category=presenca_cat$categoria2), FUN=sum)
@@ -152,11 +151,11 @@ presenca_cat2$Category <- factor(presenca_cat2$Category, levels = presenca_cat2$
 # grafico
 ggplot(presenca_cat2, aes(x = presenca_cat2$Category, y = presenca_cat2$x))+
   geom_bar(stat = "identity", fill = "#2c3b3e") +
-  labs(x = "", y = "Número de Conselheiros(as)", title = "Representação por Categoria 1") +
+  labs(x = "", y = "Conselheiros(as) Presentes", title = "Presença nas Reuniões por Categoria 2") +
   geom_label(label = presenca_cat2$x,size = 2.5, color = "black", fontface = "plain") +
-  theme_arretado()+
-  coord_flip()
-ggsave("Resultados/barra_inst_cat2.png", width = 10, height = 4, units = "in")
+  theme_arretado()
+ggsave("Resultados/barra_presenca_inst_cat2.png", width = 4, height = 6, units = "in")
+
 #==== based on titularity ====#
 
 # select cases
