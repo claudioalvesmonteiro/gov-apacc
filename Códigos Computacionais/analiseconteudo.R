@@ -203,122 +203,144 @@ paste_tema <- nomes$nod_cod[str_detect(nomes$Var1, "tema_")]
 data_flow$OUT[str_detect(data_flow$Var2, paste(paste_cat, collapse = '|'))] <- "CAT"
 data_flow$OUT[str_detect(data_flow$Var2, paste(paste_tema, collapse = '|'))] <- "TEMA"
 
-cod_nome_in <- data_flow[,c("nod_cod", "IN")]
+data_flow <- mutate(data_flow, select = ifelse(IN == OUT, 1, 0))
+data_flow <- data_flow[data_flow$select == 0,]
+data_flow1 <- data_flow[data_flow$Freq != 0,]
+data_flow2 <- data_flow[data_flow1$Freq > 1,]
 
-str_detect(data_flow$Var2, "st\\.|ste\\.", "st")
-
-test <- merge(data_flow$Var2)
 
 # Make the Network
 # https://www.r-graph-gallery.com/253-custom-network-chart-networkd3/7
 # https://christophergandrud.github.io/networkD3/
 
-sankeyNetwork(Links = data_flow, Nodes = nomes,
+ColourScale <- 'd3.scaleOrdinal()
+            .domain(["Categoria de Análise", "Tema de Debate"])
+           .range(["#FF6900", "#694489"]);'
+
+#===== SANKEYNETWORK =====#
+sankeyNetwork(Links = data_flow2, Nodes = nomes,
               Source = "IDsource", Target = "IDtarget",
               Value = "Freq", NodeID = "nome_nod", 
               fontSize = 12, nodeWidth = 30,
-              NodeGroup = "grupos"
-              )
+              NodeGroup = "grupos",
+              sinksRight = FALSE,
+              iterations = 0,
+              colourScale = JS(ColourScale))
 
-forceNetwork(
-  data_flow, 
-  Nodes = nomes,
-  Source = "IDsource", 
-  Target = "IDtarget",
-  Value = "Freq", 
-  NodeID = "nome_nod", 
-  Group = "grupos",
-  
-  linkDistance = 200,   
-  opacity = 0.7,
-  legend = T,  
-  height = 700,                                               
-  width = 700,
-  zoom = TRUE ,
-  fontSize = 17,                                                    
-  fontFamily = "serif"
-  )
-
+#===== NETWORK3 ======#
+network_tema_cat <- 
+  forceNetwork(data_flow2, Nodes = nomes, Source = "IDsource",  Target = "IDtarget",
+               Value = "Freq",  NodeID = "nome_nod",  Group = "grupos",
+               opacityNoHover = 1, linkDistance = 300, opacity = 1, legend = T,  
+               height = 700, width = 700, zoom = TRUE , fontSize = 12,                                                    
+               fontFamily = "serif", colourScale = JS(ColourScale) )
+network_tema_cat
+saveNetwork(network_tema_cat,file = 'Resultados/network_tema_categoria.html', selfcontained=TRUE)
 
 # From these flows we need to create a node data frame: it lists every entities involved in the flow
 # nodes=data.frame(name=c(as.character(links$source), as.character(links$target)) %>% unique())
 
 
-prox1_matrix <- crossCodes(
-  codeList = c("cat_CONFLITO", "tema_FISCALIZAÇÃOeMONITOR", "eduardo_machado", "cat_COOPERAÇÃO", "beatriz_mesquita", "tema_PESCA"), 
-  data = coding_table, relation = "proximity")
+#======================================#
+# CONSEL X ATUACAO                     #
+#======================================#
 
-#=============================#
-# codigos flow complelto      #
-#=============================#
+# selecionar codigos de temas e categorias
+paste_2 <- c("cat_", "tema_", "DESTAQUES", "DUVIDA_")
+cont_cod_data <- mutate(cont_cod_data, select = 1)
+cont_cod_data$select[str_detect(cont_cod_data$Var1, paste(paste_2, collapse = '|'))] <- 2
 
-# selecionar codes e code names
-codes <- coding_table[!duplicated(coding_table$cid),]
-codes <- codes[,c(2, 4)]
-  
-# matriz de inclusao entre codigos
-prox2_matrix <- crossCodes(
-  codeList = codes$codename,
-    data = coding_table, relation = "inclusion")
+crosscod2 <- cont_cod_data[cont_cod_data$select == 1,]
+crosscod2 <- as.character(crosscod2$Var1)
 
-# transformar matriz em dataframe
-data_flow <- as.data.frame(as.table(prox2_matrix))
+include2_matrix <- crossCodes(codeList = crosscod2, 
+                           data = coding_table, 
+                           relation = "inclusion")
 
-# transformar coluna 1 em numeric
-cod_seq <- regmatches(data_flow$Var1, gregexpr("[[:digit:]]+", data_flow$Var1))
-data_flow$Var1 <- as.numeric(unlist(cod_seq))
+# transformar matrix em dataframe
+data_flow2 <- data.frame(as.table(include2_matrix))
+
+# capturar numero dos codigos
+cod_seq2 <- regmatches(data_flow2$Var1, gregexpr("[[:digit:]]+", data_flow2$Var1))
+data_flow2$nod_cod <- as.numeric(unlist(cod_seq2))
+
+# transformar variaveis
+data_flow2$Var2 <- as.numeric(as.character(data_flow2$Var2))
+data_flow2$Var1 <- as.character(data_flow2$Var1)
+
+# definir nomes dos nodes
+nomes2 <- data.frame(nome_nod = crosscod2)
+nomes2$nome_nod <- as.character(nomes2$nome_nod)
+
+flow_unique2 <- data_flow2[!duplicated(data_flow2$Var1),]
 
 # limpar base
-data_flow <- mutate(data_flow, clean = ifelse(Var1 == Var2 | is.na(Freq), 1, 0))
-data_flow <- data_flow[data_flow$clean == 0,]
-data_flow$Var2 <- as.numeric(as.character(data_flow$Var2))
+data_flow2 <- mutate(data_flow2, clean = ifelse(Var2 == nod_cod | is.na(Freq), 1, 0))
+data_flow2 <- data_flow2[data_flow2$clean == 0,]
+
+flow_unique2$nome_nod <- best_match(flow_unique2$Var1, nomes2$nome_nod)
+
+# mergir nome e numero dos codigos
+nomes2 <- merge(flow_unique2, nomes2, by = "nome_nod")
+
+# definir grupos
+nomes2 <- mutate(nomes2, grupos = NA)
+nomes2$grupos[str_detect(nomes2$nome_nod, "atua_")] <- "Atuação nos Debates" 
+nomes2$grupos[is.na(nomes2$grupos)] <- "Representante" 
 
 # criar IDs
-data_flow$IDsource = match(data_flow$Var1, codes$cid)-1 
-data_flow$IDtarget = match(data_flow$Var2, codes$cid)-1
+data_flow2$IDsource = match(data_flow2$nod_cod, nomes2$nod_cod)-1 
+data_flow2$IDtarget = match(data_flow2$Var2, nomes2$nod_cod)-1
 
-# Make the Network
-# https://www.r-graph-gallery.com/253-custom-network-chart-networkd3/7
-# https://christophergandrud.github.io/networkD3/
+# selecionar relacoes entre representantes e atuacao ##
+data_flow2 <- mutate(data_flow2, IN = NA)
+data_flow2$IN[str_detect(data_flow2$Var1, "atua_")] <- "ATUA" 
+data_flow2$IN[is.na(data_flow2$IN)] <- "REP" 
 
-sankeyNetwork(Links = data_flow, 
-              Nodes = codes,
-              Source = "IDsource", 
-              Target = "IDtarget",
-              Value = "Freq", 
-              NodeID = "codename", 
-              fontSize = 12, 
-              nodeWidth = 30
-)
+data_flow2 <- mutate(data_flow2, OUT = "")
+paste2_atua <- nomes2$nod_cod[nomes2$grupos == "Atuação nos Debates"]
+paste2_rep <- nomes2$nod_cod[nomes2$grupos == "Representante"]
+data_flow2$OUT[str_detect(data_flow2$Var2, paste(paste2_atua, collapse = '|'))] <- "ATUA"
+data_flow2$OUT[str_detect(data_flow2$Var2, paste(paste2_rep, collapse = '|'))] <- "REP"
 
-forceNetwork(
-  data_flow, 
-  Nodes = codes,
-  Source = "IDsource", 
-  Target = "IDtarget",
-  Value = "Freq", 
-  NodeID = "codename", 
-  Group = "codename",
-  
-  linkDistance = 200,   
-  opacity = 0.7,
-  legend = F,  
-  height = 700,                                               
-  width = 700,
-  zoom = TRUE ,
-  fontSize = 17,                                                    
-  fontFamily = "serif"
-)
+data_flow2 <- mutate(data_flow2, select = ifelse(IN == OUT, 1, 0))
+data_flow2 <- data_flow2[data_flow2$select == 0,]
+data_flow2 <- data_flow2[data_flow2$Freq != 0,]
+#data_flow2_mani <- data_flow2[data_flow2$Freq > 1,]
 
+# 
+mani1 <- as.factor(data_flow2$Var1)
+mani1 <- data.frame(Var1 = levels(mani1))
+mani1$Var1 <- as.character(mani1$Var1) 
+nomes3 <- merge(mani1, nomes2, by = "Var1")
 
-fun1 <- function(x){
-if(x > 10) 
-  print("Opa")
-  else
-    print("ent")
-}
+#
 
-fun1(1300)
+ColourScale <- 'd3.scaleOrdinal()
+.domain(["Atuação nos Debates", "Representante"])
+.range(["#FF6900", "#694489"]);'
+
+#===== SANKEYNETWORK =====#
+sankeyNetwork(Links = data_flow2, Nodes = nomes2,
+              Source = "IDsource", Target = "IDtarget",
+              Value = "Freq", NodeID = "nome_nod", 
+              fontSize = 12, nodeWidth = 30,
+              NodeGroup = "grupos",
+              sinksRight = FALSE,
+              iterations = 0,
+              colourScale = JS(ColourScale))
+
+#===== NETWORK3 ======#
+network_rep_atua <- 
+  forceNetwork(data_flow2, Nodes = nomes2, Source = "IDsource",  Target = "IDtarget",
+               Value = "Freq",  NodeID = "nome_nod",  Group = "grupos",
+               opacityNoHover = 1, linkDistance = 300, opacity = 1, legend = T,  
+               height = 700, width = 700, zoom = TRUE , fontSize = 12,                                                    
+               fontFamily = "serif", colourScale = JS(ColourScale) )
+network_rep_atua
+
+saveNetwork(network_rep_atua,file = 'Resultados/network_rep_atua.html', selfcontained=TRUE)
+
 
 
 
