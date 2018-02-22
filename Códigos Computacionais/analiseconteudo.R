@@ -140,6 +140,8 @@ ggplot(debate_area_cont, aes(x = nomes, y = prop_tema))+
 crosscod1 <- c(as.character(cont_cod_data$Var1[str_detect(cont_cod_data$Var1, "tema_")]),
 as.character(cont_cod_data$Var1[str_detect(cont_cod_data$Var1, "cat_")]))
 
+crosscod1 <- crosscod1[-c(6:8, 11)]
+
 prox1_matrix <- crossCodes(codeList = crosscod1, 
                            data = coding_table, 
                            relation = "exact")
@@ -205,8 +207,8 @@ data_flow$OUT[str_detect(data_flow$Var2, paste(paste_tema, collapse = '|'))] <- 
 
 data_flow <- mutate(data_flow, select = ifelse(IN == OUT, 1, 0))
 data_flow <- data_flow[data_flow$select == 0,]
-data_flow1 <- data_flow[data_flow$Freq != 0,]
-data_flow2 <- data_flow[data_flow1$Freq > 1,]
+data_flow_mani <- data_flow[data_flow$Freq != 0,]
+#data_flow2 <- data_flow[data_flow1$Freq > 1,]
 
 
 # Make the Network
@@ -218,7 +220,7 @@ ColourScale <- 'd3.scaleOrdinal()
            .range(["#FF6900", "#694489"]);'
 
 #===== SANKEYNETWORK =====#
-sankeyNetwork(Links = data_flow2, Nodes = nomes,
+sankeyNetwork(Links = data_flow_mani, Nodes = nomes,
               Source = "IDsource", Target = "IDtarget",
               Value = "Freq", NodeID = "nome_nod", 
               fontSize = 12, nodeWidth = 30,
@@ -229,21 +231,23 @@ sankeyNetwork(Links = data_flow2, Nodes = nomes,
 
 #===== NETWORK3 ======#
 network_tema_cat <- 
-  forceNetwork(data_flow2, Nodes = nomes, Source = "IDsource",  Target = "IDtarget",
+  forceNetwork(data_flow_mani, Nodes = nomes, Source = "IDsource",  Target = "IDtarget",
                Value = "Freq",  NodeID = "nome_nod",  Group = "grupos",
-               opacityNoHover = 1, linkDistance = 300, opacity = 1, legend = T,  
+               opacityNoHover = 1, linkDistance = 400, opacity = 1, legend = T,  
                height = 700, width = 700, zoom = TRUE , fontSize = 12,                                                    
                fontFamily = "serif", colourScale = JS(ColourScale) )
 network_tema_cat
-saveNetwork(network_tema_cat,file = 'Resultados/network_tema_categoria.html', selfcontained=TRUE)
+saveNetwork(network_tema_cat ,file = 'network_tema_categoria2.html', selfcontained=TRUE)
 
 # From these flows we need to create a node data frame: it lists every entities involved in the flow
 # nodes=data.frame(name=c(as.character(links$source), as.character(links$target)) %>% unique())
 
 
-#======================================#
-# CONSEL X ATUACAO                     #
-#======================================#
+#============================================#
+# CONSEL X ATUACAO                           #
+#============================================#
+# **** problema com codigos de inclusão *****
+#============================================#
 
 # selecionar codigos de temas e categorias
 paste_2 <- c("cat_", "tema_", "DESTAQUES", "DUVIDA_")

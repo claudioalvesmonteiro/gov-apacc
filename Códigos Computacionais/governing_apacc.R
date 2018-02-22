@@ -18,9 +18,6 @@
 # carregar pacotes
 library(readxl); library(ggplot2)
 
-# read data
-apacc_data <- read_excel("Dados/Listas Presença Conselho APACC.xlsx")
-
 # tema para os graficos em ggplot
 theme_arretado<- function(base_size = 12, base_family = "") {
   theme_minimal(base_size = base_size, base_family = base_family) %+replace% 
@@ -62,58 +59,104 @@ ggplot(sex_apacc2, aes(x = Sexo, y = Freq))+
 
 ggsave("barapacc_sex.png", width = 4, height =5.5, units = "in")
 
-#----------------#
-# Institutions 
-#----------------#
+#=====================================#
+#      ANALISE DAS INSTITUICOES       #
+#=====================================#
 
+# ler bancos
+apacc_data <- read_excel("Dados/Listas Presença Conselho APACC.xlsx")
+insti_categorias <- read_excel("Dados/instituições_apacc_2.0.xlsx")
+
+# transformar em caixa alta e fator
 apacc_data$entidade_sigla <- as.factor(toupper(apacc_data$entidade_sigla))
 
-#==== based on total count ====#
+# selecionar categorias e instituicoes
+insti_categorias <- insti_categorias[!duplicated(insti_categorias$entidade_sigla),]
 
-# find institutions appearing in the cousel
+
+#====== REPRESENTACAO TOTAL =======#
+
+# contagem geral das instituicoes
 represent_insti <- data.frame(table(apacc_data$entidade_sigla))
 
-represent_insti <- represent_insti[order(-represent_insti$Freq),]
+# mergir com categorias
+represent_insti$entidade_sigla <- represent_insti$Var1
+represent_cat <- merge(represent_insti, insti_categorias, by = "entidade_sigla")
 
-library(xlsx)
-write.xlsx(represent_insti, file = "instituiÃ§Ãµes_apacc.xlsx")
+#==== somar representacao com base na categoria 1 ====#
+rep_total_cat1 <- aggregate(represent_cat$Freq, by=list(Category=represent_cat$categoria1), FUN=sum)
 
-represent_insti$Sigla <- factor(represent_insti$Var1, levels = represent_insti$Var1)
+# ordernar valores 
+rep_total_cat1 <- rep_total_cat1[order(rep_total_cat1$x),]
+rep_total_cat1$Category <- factor(rep_total_cat1$Category, levels = rep_total_cat1$Category)
 
-
-barra_inst <- ggplot(represent_insti, aes(x = represent_insti$Sigla, y = represent_insti$Freq))+
+# grafico
+ggplot(rep_total_cat1, aes(x = rep_total_cat1$Category, y = rep_total_cat1$x))+
   geom_bar(stat = "identity", fill = "#2c3b3e") +
-  labs(x = "", y = "NÃºmero de Conselheiros", title = "Conselheiros Totais") +
-  geom_label(label = represent_insti$Freq,
-             size = 2.5, color = "black", fontface = "plain") +
+  labs(x = "", y = "Número de Conselheiros(as)", title = "Representação por Categoria 1") +
+  geom_label(label = rep_total_cat1$x,size = 2.5, color = "black", fontface = "plain") +
   theme_arretado()+
   coord_flip()
-barra_inst
+ggsave("Resultados/barra_inst_cat1.png", width = 10, height = 4, units = "in")
 
-ggsave("total_inst.png", barra_inst, width = 6, height = 12, units = "in")
+#==== somar representacao com base na categoria 2 ====#
+rep_total_cat2 <- aggregate(represent_cat$Freq, by=list(Category=represent_cat$categoria2), FUN=sum)
 
-#==== based on presence ====#
+# ordernar valores 
+rep_total_cat2 <- rep_total_cat2[order(rep_total_cat2$x),]
+rep_total_cat2$Category <- factor(rep_total_cat2$Category, levels = rep_total_cat2$Category)
 
-inst_presen <- apacc_data[apacc_data$presente == 1,]
-
-# find institutions present in the cousel
-inst_presen <- data.frame(table(inst_presen$entidade_sigla))
-
-inst_presen <- inst_presen[order(inst_presen$Freq),]
-
-inst_presen$Sigla <- factor(inst_presen$Var1, levels = inst_presen$Var1)
-
-barra_inst2 <- ggplot(inst_presen, aes(x = inst_presen$Sigla, y = inst_presen$Freq))+
+# grafico
+ggplot(rep_total_cat2, aes(x = rep_total_cat2$Category, y = rep_total_cat2$x))+
   geom_bar(stat = "identity", fill = "#2c3b3e") +
-  scale_y_continuous(limits = c(0,50))+
-  labs(x = "", y = "NÃºmero de Conselheiros", title = "Conselheiros Presentes") +
-  geom_label(label = inst_presen$Freq,
-             size = 2.5, color = "black", fontface = "plain") +
+  labs(x = "", y = "Número de Conselheiros(as)", title = "Representação por Categoria 1") +
+  geom_label(label = rep_total_cat2$x,size = 2.5, color = "black", fontface = "plain") +
   theme_arretado()+
   coord_flip()
-barra_inst2
-ggsave("presen_inst.png", barra_inst2, width = 6, height = 12, units = "in")
+ggsave("Resultados/barra_inst_cat2.png", width = 10, height = 4, units = "in")
 
+
+#====== REPRESENTACAO POR PRESENCA =======#
+
+# contagem das instituicoes presentes
+presente_insti <- apacc_data[apacc_data$presente ==1,]
+presente_insti <- data.frame(table(presente_insti$entidade_sigla))
+
+# mergir com categorias
+presente_insti$entidade_sigla <- presente_insti$Var1
+presenca_cat <- merge(presente_insti, insti_categorias, by = "entidade_sigla")
+
+#==== somar presenca com base na categoria 1 ====#
+presenca_cat1 <- aggregate(presenca_cat$Freq, by=list(Category=presenca_cat$categoria1), FUN=sum)
+
+# ordernar valores 
+presenca_cat1 <- presenca_cat1[order(presenca_cat1$x),]
+presenca_cat1$Category <- factor(presenca_cat1$Category, levels = presenca_cat1$Category)
+
+# grafico
+ggplot(presenca_cat1, aes(x = presenca_cat1$Category, y = presenca_cat1$x))+
+  geom_bar(stat = "identity", fill = "#2c3b3e") +
+  labs(x = "", y = "Número de Conselheiros(as)", title = "Presença nas Reuniões por Categoria 1") +
+  geom_label(label = presenca_cat1$x,size = 2.5, color = "black", fontface = "plain") +
+  theme_arretado()+
+  coord_flip()
+ggsave("Resultados/barra_pres_insti_cat1.png", width = 10, height = 4, units = "in")
+
+#==== somar representacao com base na categoria 2 ====#
+presenca_cat2 <- aggregate(presenca_cat$Freq, by=list(Category=presenca_cat$categoria2), FUN=sum)
+
+# ordernar valores 
+presenca_cat2 <- presenca_cat2[order(presenca_cat2$x),]
+presenca_cat2$Category <- factor(presenca_cat2$Category, levels = presenca_cat2$Category)
+
+# grafico
+ggplot(presenca_cat2, aes(x = presenca_cat2$Category, y = presenca_cat2$x))+
+  geom_bar(stat = "identity", fill = "#2c3b3e") +
+  labs(x = "", y = "Número de Conselheiros(as)", title = "Representação por Categoria 1") +
+  geom_label(label = presenca_cat2$x,size = 2.5, color = "black", fontface = "plain") +
+  theme_arretado()+
+  coord_flip()
+ggsave("Resultados/barra_inst_cat2.png", width = 10, height = 4, units = "in")
 #==== based on titularity ====#
 
 # select cases
