@@ -111,8 +111,7 @@ ggplot(rep_total_cat2, aes(x = rep_total_cat2$Category, y = rep_total_cat2$x))+
   geom_bar(stat = "identity", fill = "#2c3b3e") +
   labs(x = "", y = "Número de Conselheiros(as)", title = "Representação Total por Categoria 2") +
   geom_label(label = rep_total_cat2$x,size = 2.5, color = "black", fontface = "plain") +
-  theme_arretado()+
-  coord_flip()
+  theme_arretado()
 ggsave("Resultados/barra_inst_cat2.png", width = 10, height = 4, units = "in")
 
 
@@ -138,7 +137,8 @@ ggplot(presenca_cat1, aes(x = presenca_cat1$Category, y = presenca_cat1$x))+
   geom_bar(stat = "identity", fill = "#2c3b3e") +
   labs(x = "", y = "Conselheiros(as) Presentes", title = "Presença nas Reuniões por Categoria 1") +
   geom_label(label = presenca_cat1$x,size = 2.5, color = "black", fontface = "plain") +
-  theme_arretado()
+  theme_arretado()+
+  coord_flip()
 ggsave("Resultados/barra_pres_insti_cat1.png", width = 4, height = 6, units = "in")
 
 #==== somar representacao com base na categoria 2 ====#
