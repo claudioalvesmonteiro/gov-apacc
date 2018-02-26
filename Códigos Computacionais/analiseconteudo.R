@@ -89,14 +89,10 @@ getFileNames(fid = getFileIds())
 # Codificacao automatizada por palavra chave
 #==============================================#
 
-# cid 85 = TESTE_pesca # codingBySearch("pesc",fid=getFileIds(),cid=85)
-# cid 86 = TESTE_turismo # codingBySearch("turis",fid=getFileIds(),cid=86)  
-# cid 87 = TESTE_pesquisa # codingBySearch("pesq",fid=getFileIds(),cid=87)
-
-# codificar nomes dos conselheiros
-codingBySearch("Mauro Maida",fid=getFileIds(),cid=26)
-# cid 87 = TESTE_pesquisa # codingBySearch("pesq",fid=getFileIds(),cid=87)
-# cid 87 = TESTE_pesquisa # codingBySearch("pesq",fid=getFileIds(),cid=87)
+# codificar termos de destaque
+codingBySearch("Mangue",fid=getFileIds(),cid=50)
+codingBySearch("Pesca",fid=getFileIds(),cid=64)
+codingBySearch("Turismo",fid=getFileIds(),cid=65)
 
 
 #---- analise ----#
