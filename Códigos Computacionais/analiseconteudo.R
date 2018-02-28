@@ -14,7 +14,7 @@
 
 # carregar pacotes
 library(GGally); library(network); library(sna); library(ggplot2); library(RQDA)
-library(RQDA); library(dplyr); library(stringr); library(ggplot2)
+library(RQDA); library(dplyr); library(stringr); library(ggplot2); library(networkD3)
 
 # executar pacote RQDA (p/ analise de conteudo)
 RQDA()
@@ -53,8 +53,8 @@ cont_cod_tema$prop_tema2 <- paste(round(cont_cod_tema$prop_tema, 2), "%", sep=""
 
 # renomear colunas
 cont_cod_tema <- mutate(cont_cod_tema, nomes_temas = Var1)
-cont_cod_tema$nomes_temas <- c("Educação Socioambiental", "Fiscalização e Monitoramento", "Institucional",  "Manguezal", "Pesca",
-                                "Pesquisa", "Plano de Manejo", "Recursos Financeiros", "Turismo", "Zoneamento")
+cont_cod_tema$nomes_temas <- c("Educação Socioambiental", "Fiscalização e Monitoramento", "Institucional APACC", "Institucional CONAPAC",
+                                 "Plano de Manejo", "Recursos Financeiros", "Zoneamento")
 
 # ordenar
 cont_cod_tema$nomes_temas <- factor(cont_cod_tema$nomes_temas, levels = cont_cod_tema$nomes_temas[order(cont_cod_tema$prop_tema)])
@@ -62,10 +62,11 @@ cont_cod_tema$nomes_temas <- factor(cont_cod_tema$nomes_temas, levels = cont_cod
 # visualizar graficamente
 ggplot(cont_cod_tema, aes(x = nomes_temas, y = prop_tema))+
   geom_bar(stat = "identity", fill = "#15041c") +
-  geom_label(aes(x = nomes_temas, y = prop_tema, label = prop_tema2))+
+  geom_label(aes(x = nomes_temas, y = prop_tema, label = prop_tema2), size = 2.3)+
   labs(y = "Proporção", x = "", title = "") +
   coord_flip()
-
+ggsave("prop_debate_tema.png", path = "Resultados",
+       width = 7, height = 3, units = "in")
 
 #============================================#
 # Variacao de codigos nos arquivos (tempo)   # **EM CONSTRUCAO**
@@ -136,7 +137,7 @@ ggplot(debate_area_cont, aes(x = nomes, y = prop_tema))+
 crosscod1 <- c(as.character(cont_cod_data$Var1[str_detect(cont_cod_data$Var1, "tema_")]),
 as.character(cont_cod_data$Var1[str_detect(cont_cod_data$Var1, "cat_")]))
 
-crosscod1 <- crosscod1[-c(6:8, 11)]
+crosscod1 <- crosscod1[-12]
 
 prox1_matrix <- crossCodes(codeList = crosscod1, 
                            data = coding_table, 
@@ -190,21 +191,22 @@ nomes$grupos[str_detect(nomes$nome_nod, "tema_")] <- "Tema de Debate"
 data_flow$IDsource = match(data_flow$nod_cod, nomes$nod_cod)-1 
 data_flow$IDtarget = match(data_flow$Var2, nomes$nod_cod)-1
 
-# selecionar relacoes entre temas e codigos ##
-data_flow <- mutate(data_flow, IN = "")
-data_flow$IN[str_detect(data_flow$Var1, "tema_")] <- "TEMA" 
-data_flow$IN[str_detect(data_flow$Var1, "cat_")] <- "CAT" 
+#===== selecionar relacoes entre temas e codigos =====#
+#data_flow <- mutate(data_flow, IN = "")
+#data_flow$IN[str_detect(data_flow$Var1, "tema_")] <- "TEMA" 
+#data_flow$IN[str_detect(data_flow$Var1, "cat_")] <- "CAT" 
 
-data_flow <- mutate(data_flow, OUT = "")
-paste_cat <- nomes$nod_cod[str_detect(nomes$Var1, "cat_")]
-paste_tema <- nomes$nod_cod[str_detect(nomes$Var1, "tema_")]
-data_flow$OUT[str_detect(data_flow$Var2, paste(paste_cat, collapse = '|'))] <- "CAT"
-data_flow$OUT[str_detect(data_flow$Var2, paste(paste_tema, collapse = '|'))] <- "TEMA"
+#data_flow <- mutate(data_flow, OUT = "")
+#paste_cat <- nomes$nod_cod[str_detect(nomes$Var1, "cat_")]
+#paste_tema <- nomes$nod_cod[str_detect(nomes$Var1, "tema_")]
+#data_flow$OUT[str_detect(data_flow$Var2, paste(paste_cat, collapse = '|'))] <- "CAT"
+#data_flow$OUT[str_detect(data_flow$Var2, paste(paste_tema, collapse = '|'))] <- "TEMA"
 
-data_flow <- mutate(data_flow, select = ifelse(IN == OUT, 1, 0))
-data_flow <- data_flow[data_flow$select == 0,]
+#data_flow <- mutate(data_flow, select = ifelse(IN == OUT, 1, 0))
+#data_flow <- data_flow[data_flow$select == 0,]
+
 data_flow_mani <- data_flow[data_flow$Freq != 0,]
-#data_flow2 <- data_flow[data_flow1$Freq > 1,]
+data_flow2 <- data_flow_mani[data_flow_mani$Freq > 1,]
 
 
 # Make the Network
@@ -229,11 +231,11 @@ sankeyNetwork(Links = data_flow_mani, Nodes = nomes,
 network_tema_cat <- 
   forceNetwork(data_flow_mani, Nodes = nomes, Source = "IDsource",  Target = "IDtarget",
                Value = "Freq",  NodeID = "nome_nod",  Group = "grupos",
-               opacityNoHover = 1, linkDistance = 400, opacity = 1, legend = T,  
-               height = 700, width = 700, zoom = TRUE , fontSize = 12,                                                    
+               opacityNoHover = 1, linkDistance = 300, opacity = 0.9, legend = T,  
+               height = 500, width = 700, zoom = TRUE , fontSize = 12,                                                    
                fontFamily = "serif", colourScale = JS(ColourScale) )
 network_tema_cat
-saveNetwork(network_tema_cat ,file = 'network_tema_categoria2.html', selfcontained=TRUE)
+saveNetwork(network_tema_cat ,file = 'network_tema_categoria_all.html', selfcontained=TRUE)
 
 # From these flows we need to create a node data frame: it lists every entities involved in the flow
 # nodes=data.frame(name=c(as.character(links$source), as.character(links$target)) %>% unique())
@@ -339,7 +341,21 @@ network_rep_atua <-
                fontFamily = "serif", colourScale = JS(ColourScale) )
 network_rep_atua
 
-saveNetwork(network_rep_atua,file = 'Resultados/network_rep_atua.html', selfcontained=TRUE)
+saveNetwork(network_rep_atua, file = 'Resultados/network_rep_atua.html', selfcontained=TRUE)
+
+#======================================#
+#     ANALISE DE VOZ NOS DEBATES       #
+#======================================#
+
+
+
+
+
+
+
+
+
+
 
 
 
