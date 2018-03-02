@@ -346,14 +346,30 @@ saveNetwork(network_rep_atua, file = 'Resultados/network_rep_atua.html', selfcon
 #     ANALISE DE VOZ NOS DEBATES       #
 #======================================#
 
+# selecionar codigos dos representantes
 paste_voz<- c("cat_", "tema_", "DESTAQUES", "DUVIDA_", "atua_", "DECISOES", "termo_")
 cont_cod_data <- mutate(cont_cod_data, select_voz = 1)
 cont_cod_data$select_voz[str_detect(cont_cod_data$Var1, paste(paste_voz, collapse = '|'))] <- 2
-
 codes_represent <- cont_cod_data[cont_cod_data$select_voz == 1,]
 
+# importar base de instituicoes por representante
+insti_categorias <- read_excel("Dados/instituições_apacc_2.0.xlsx")
 
+#==== match nomes dos representantes =====#
 
+# limpar bases
+codes_represent$Var1 <- str_replace_all(codes_represent$Var1, "_", " ")
+codes_represent$Var1 <- stri_trans_general(codes_represent$Var1 , "Latin-ASCII")
+codes_represent$nome_consel <- as.character(codes_represent$Var1)
+
+insti_categorias$nome_consel <- stri_trans_general(insti_categorias$nome_consel , "Latin-ASCII")
+
+# mergir base de conselheiros
+data_consel <- merge(insti_categorias, codes_represent, by = "nome_consel")
+
+# criar e salvar base de representantes n-conselheiros
+data_rep_nconsel <- codes_represent[str_detect(codes_represent$nome_consel, "1"),]
+write.csv(data_rep_nconsel, file = "Dados/data_rep_nconsel.csv")
 
 
 
