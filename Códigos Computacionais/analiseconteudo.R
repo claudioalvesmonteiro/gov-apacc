@@ -4,7 +4,7 @@
 # ANALISE DE CONTEUDO DAS MEMORIAS               #
 # Recife - Pernambuco - Brasil                   #
 #------------------------------------------------#
-# Fundação Joaquim Nabuco (FUNDAJ)               #
+# Funda??o Joaquim Nabuco (FUNDAJ)               #
 #------------------------------------------------#
 # Claudio A. Monteiro                            #
 # claudiomonteirol.a@gmail.com                   #
@@ -53,7 +53,7 @@ cont_cod_tema$prop_tema2 <- paste(round(cont_cod_tema$prop_tema, 2), "%", sep=""
 
 # renomear colunas
 cont_cod_tema <- mutate(cont_cod_tema, nomes_temas = Var1)
-cont_cod_tema$nomes_temas <- c("Educação Socioambiental", "Fiscalização e Monitoramento", "Institucional APACC", "Institucional CONAPAC",
+cont_cod_tema$nomes_temas <- c("Educa??o Socioambiental", "Fiscaliza??o e Monitoramento", "Institucional APACC", "Institucional CONAPAC",
                                  "Plano de Manejo", "Recursos Financeiros", "Zoneamento")
 
 # ordenar
@@ -63,7 +63,7 @@ cont_cod_tema$nomes_temas <- factor(cont_cod_tema$nomes_temas, levels = cont_cod
 ggplot(cont_cod_tema, aes(x = nomes_temas, y = prop_tema))+
   geom_bar(stat = "identity", fill = "#15041c") +
   geom_label(aes(x = nomes_temas, y = prop_tema, label = prop_tema2), size = 2.3)+
-  labs(y = "Proporção", x = "", title = "") +
+  labs(y = "Propor??o", x = "", title = "") +
   coord_flip()
 ggsave("prop_debate_tema.png", path = "Resultados",
        width = 7, height = 3, units = "in")
@@ -94,7 +94,6 @@ getFileNames(fid = getFileIds())
 codingBySearch("Mangue",fid=getFileIds(),cid=50)
 codingBySearch("Pesca",fid=getFileIds(),cid=64)
 codingBySearch("Turismo",fid=getFileIds(),cid=65)
-
 
 #---- analise ----#
 
@@ -184,7 +183,7 @@ nomes <- merge(flow_unique, nomes, by = "nome_nod")
 
 # definir grupos
 nomes <- mutate(nomes, grupos = "")
-nomes$grupos[str_detect(nomes$nome_nod, "cat_")] <- "Categoria de Análise" 
+nomes$grupos[str_detect(nomes$nome_nod, "cat_")] <- "Categoria de An?lise" 
 nomes$grupos[str_detect(nomes$nome_nod, "tema_")] <- "Tema de Debate" 
 
 # criar IDs
@@ -214,7 +213,7 @@ data_flow2 <- data_flow_mani[data_flow_mani$Freq > 1,]
 # https://christophergandrud.github.io/networkD3/
 
 ColourScale <- 'd3.scaleOrdinal()
-            .domain(["Categoria de Análise", "Tema de Debate"])
+            .domain(["Categoria de An?lise", "Tema de Debate"])
            .range(["#FF6900", "#694489"]);'
 
 #===== SANKEYNETWORK =====#
@@ -244,7 +243,7 @@ saveNetwork(network_tema_cat ,file = 'network_tema_categoria_all.html', selfcont
 #============================================#
 # CONSEL X ATUACAO                           #
 #============================================#
-# **** problema com codigos de inclusão *****
+# **** problema com codigos de inclus?o *****
 #============================================#
 
 # selecionar codigos de temas e categorias
@@ -287,7 +286,7 @@ nomes2 <- merge(flow_unique2, nomes2, by = "nome_nod")
 
 # definir grupos
 nomes2 <- mutate(nomes2, grupos = NA)
-nomes2$grupos[str_detect(nomes2$nome_nod, "atua_")] <- "Atuação nos Debates" 
+nomes2$grupos[str_detect(nomes2$nome_nod, "atua_")] <- "Atua??o nos Debates" 
 nomes2$grupos[is.na(nomes2$grupos)] <- "Representante" 
 
 # criar IDs
@@ -300,7 +299,7 @@ data_flow2$IN[str_detect(data_flow2$Var1, "atua_")] <- "ATUA"
 data_flow2$IN[is.na(data_flow2$IN)] <- "REP" 
 
 data_flow2 <- mutate(data_flow2, OUT = "")
-paste2_atua <- nomes2$nod_cod[nomes2$grupos == "Atuação nos Debates"]
+paste2_atua <- nomes2$nod_cod[nomes2$grupos == "Atua??o nos Debates"]
 paste2_rep <- nomes2$nod_cod[nomes2$grupos == "Representante"]
 data_flow2$OUT[str_detect(data_flow2$Var2, paste(paste2_atua, collapse = '|'))] <- "ATUA"
 data_flow2$OUT[str_detect(data_flow2$Var2, paste(paste2_rep, collapse = '|'))] <- "REP"
@@ -319,7 +318,7 @@ nomes3 <- merge(mani1, nomes2, by = "Var1")
 #
 
 ColourScale <- 'd3.scaleOrdinal()
-.domain(["Atuação nos Debates", "Representante"])
+.domain(["Atua??o nos Debates", "Representante"])
 .range(["#FF6900", "#694489"]);'
 
 #===== SANKEYNETWORK =====#
@@ -347,8 +346,11 @@ saveNetwork(network_rep_atua, file = 'Resultados/network_rep_atua.html', selfcon
 #     ANALISE DE VOZ NOS DEBATES       #
 #======================================#
 
+paste_voz<- c("cat_", "tema_", "DESTAQUES", "DUVIDA_", "atua_", "DECISOES", "termo_")
+cont_cod_data <- mutate(cont_cod_data, select_voz = 1)
+cont_cod_data$select_voz[str_detect(cont_cod_data$Var1, paste(paste_voz, collapse = '|'))] <- 2
 
-
+codes_represent <- cont_cod_data[cont_cod_data$select_voz == 1,]
 
 
 
