@@ -13,7 +13,7 @@
 #install.packages(c("RQDA","GGally", "network", "sna"), dependencies = T)
 
 # carregar pacotes
-library(GGally); library(network); library(sna); library(ggplot2); library(RQDA)
+library(GGally); library(network); library(sna); library(ggplot2); library(RQDA); library(readxl)
 library(RQDA); library(dplyr); library(stringr); library(ggplot2); library(networkD3)
 
 # executar pacote RQDA (p/ analise de conteudo)
@@ -358,6 +358,7 @@ insti_categorias <- read_excel("Dados/instituições_apacc_2.0.xlsx")
 #==== match nomes dos representantes =====#
 
 # limpar bases
+library(stringi)
 codes_represent$Var1 <- str_replace_all(codes_represent$Var1, "_", " ")
 codes_represent$Var1 <- stri_trans_general(codes_represent$Var1 , "Latin-ASCII")
 codes_represent$nome_consel <- as.character(codes_represent$Var1)
@@ -369,12 +370,36 @@ data_consel <- merge(insti_categorias, codes_represent, by = "nome_consel")
 
 # criar e salvar base de representantes n-conselheiros
 data_rep_nconsel <- codes_represent[str_detect(codes_represent$nome_consel, "1"),]
-write.csv(data_rep_nconsel, file = "Dados/data_rep_nconsel.csv")
+#write.csv(data_rep_nconsel, file = "Dados/data_rep_nconsel.csv")
 
+# importar base editada manulamente
+data_rep_nconsel <- read_excel("Dados/intituições_apacc3.xlsx")
 
+#==== megir bases representantes ====#
+base_representantes <- rbind(data_rep_nconsel, data_consel[,-c(5,7)])
 
+#=================================#
+# Visualizacao grafica
 
+#===== CATEGORIA 1 =====#
 
+# contar
+count_cat1 <- aggregate(base_representantes$Freq, by=list(Category=base_representantes$categoria1), FUN=sum)
 
+# transformar em prop e ordenar
+count_cat1 <- mutate(count_cat1, prop_cat1 = (x / sum(x))*100 )
+count_cat1$prop_cat1 <- round(count_cat1$prop_cat1, 2)
+count_cat1$Category <- factor(count_cat1$Category, 
+                              levels = count_cat1$Category[order(count_cat1$prop_cat1)])
 
+#===== CATEGORIA 2 =====#
+
+# contar
+count_cat2 <- aggregate(base_representantes$Freq, by=list(Category=base_representantes$categoria2), FUN=sum)
+
+# transformar em prop e ordenar
+count_cat2 <- mutate(count_cat2, prop_cat2 = (x / sum(x))*100 )
+count_cat2$prop_cat2 <- round(count_cat2$prop_cat2, 2)
+count_cat2$Category <- factor(count_cat2$Category, 
+                              levels = count_cat2$Category[order(count_cat2$prop_cat2)])
 
