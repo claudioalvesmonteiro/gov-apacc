@@ -392,6 +392,13 @@ count_cat1$prop_cat1 <- round(count_cat1$prop_cat1, 2)
 count_cat1$Category <- factor(count_cat1$Category, 
                               levels = count_cat1$Category[order(count_cat1$prop_cat1)])
 
+# ggplot2
+ggplot(count_cat1, aes(x = Category, y = prop_cat1))+
+  geom_bar(stat = "identity", fill = "#15041c") +
+  geom_label(aes(x = Category, y = prop_cat1, label = prop_cat1))+
+  labs(y = "Porcentagem", x = "", title = "") +
+  coord_flip()
+
 #===== CATEGORIA 2 =====#
 
 # contar
@@ -403,3 +410,9 @@ count_cat2$prop_cat2 <- round(count_cat2$prop_cat2, 2)
 count_cat2$Category <- factor(count_cat2$Category, 
                               levels = count_cat2$Category[order(count_cat2$prop_cat2)])
 
+# ggplot2
+ggplot(count_cat2, aes(x = Category, y = prop_cat2))+
+  geom_bar(stat = "identity", fill = "#15041c") +
+  geom_label(aes(x = Category, y = prop_cat2, label = prop_cat2))+
+  labs(y = "Porcentagem", x = "", title = "") +
+  coord_flip()
