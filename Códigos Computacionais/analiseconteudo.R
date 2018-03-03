@@ -377,6 +377,7 @@ data_rep_nconsel <- read_excel("Dados/intituições_apacc3.xlsx")
 
 #==== megir bases representantes ====#
 base_representantes <- rbind(data_rep_nconsel, data_consel[,-c(5,7)])
+#write.csv(base_representantes, file = "Dados/base_representantes_voz.csv")
 
 #=================================#
 # Visualizacao grafica
@@ -386,12 +387,22 @@ base_representantes <- rbind(data_rep_nconsel, data_consel[,-c(5,7)])
 # contar
 count_cat1 <- aggregate(base_representantes$Freq, by=list(Category=base_representantes$categoria1), FUN=sum)
 
-# transformar em prop e ordenar
+# sem os gestores
+base_rep_sem_icmbio <- base_representantes[base_representantes$entidade_sigla != "ICMBIO",]
+count_cat1 <- aggregate(base_rep_sem_icmbio$Freq, by=list(Category=base_rep_sem_icmbio$categoria1), FUN=sum)
+
+# transformar em prop 
 count_cat1 <- mutate(count_cat1, prop_cat1 = (x / sum(x))*100 )
+
+# renomear categoria 6
+count_cat1$Category[6] <- "Organizações de educação, cultura  \n  e associações comunitárias"
+
+# ordenar
 count_cat1$Category <- factor(count_cat1$Category, 
                               levels = count_cat1$Category[order(count_cat1$prop_cat1)])
 
 count_cat1$prop_cat1.2 <- paste(round(count_cat1$prop_cat1, 2), "%", sep="")
+
 
 # ggplot2
 ggplot(count_cat1, aes(x = Category, y = prop_cat1))+
@@ -400,7 +411,7 @@ ggplot(count_cat1, aes(x = Category, y = prop_cat1))+
   labs(y = "Porcentagem", x = "", title = "") +
   coord_flip()
 ggsave("prop_voz_cat1.png", path = "Resultados",
-       width = 6, height = 2, units = "in")
+       width = 8, height = 3, units = "in")
 
 
 #===== CATEGORIA 2 =====#
@@ -408,17 +419,25 @@ ggsave("prop_voz_cat1.png", path = "Resultados",
 # contar
 count_cat2 <- aggregate(base_representantes$Freq, by=list(Category=base_representantes$categoria2), FUN=sum)
 
+# sem os gestores
+count_cat2 <- aggregate(base_rep_sem_icmbio$Freq, by=list(Category=base_rep_sem_icmbio$categoria2), FUN=sum)
+
 # transformar em prop e ordenar
 count_cat2 <- mutate(count_cat2, prop_cat2 = (x / sum(x))*100 )
 count_cat2$prop_cat2 <- round(count_cat2$prop_cat2, 2)
 count_cat2$Category <- factor(count_cat2$Category, 
                               levels = count_cat2$Category[order(count_cat2$prop_cat2)])
+count_cat2$prop_cat2.2 <- paste(round(count_cat2$prop_cat2, 2), "%", sep="")
 
 # ggplot2
 ggplot(count_cat2, aes(x = Category, y = prop_cat2))+
   geom_bar(stat = "identity", fill = "#15041c") +
-  geom_label(aes(x = Category, y = prop_cat2, label = prop_cat2), size = 2.5)+
+  geom_label(aes(x = Category, y = prop_cat2, label = prop_cat2.2), size = 3.2)+
   labs(y = "Porcentagem", x = "", title = "") +
   coord_flip()
 ggsave("prop_voz_cat2.png", path = "Resultados",
-       width = 7, height = 3, units = "in")
+       width = 8, height = 3, units = "in")
+
+
+#=================================================#
+# A
