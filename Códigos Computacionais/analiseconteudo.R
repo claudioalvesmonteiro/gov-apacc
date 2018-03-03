@@ -388,16 +388,20 @@ count_cat1 <- aggregate(base_representantes$Freq, by=list(Category=base_represen
 
 # transformar em prop e ordenar
 count_cat1 <- mutate(count_cat1, prop_cat1 = (x / sum(x))*100 )
-count_cat1$prop_cat1 <- round(count_cat1$prop_cat1, 2)
 count_cat1$Category <- factor(count_cat1$Category, 
                               levels = count_cat1$Category[order(count_cat1$prop_cat1)])
+
+count_cat1$prop_cat1.2 <- paste(round(count_cat1$prop_cat1, 2), "%", sep="")
 
 # ggplot2
 ggplot(count_cat1, aes(x = Category, y = prop_cat1))+
   geom_bar(stat = "identity", fill = "#15041c") +
-  geom_label(aes(x = Category, y = prop_cat1, label = prop_cat1))+
+  geom_label(aes(x = Category, y = prop_cat1, label = prop_cat1.2), size = 2.5)+
   labs(y = "Porcentagem", x = "", title = "") +
   coord_flip()
+ggsave("prop_voz_cat1.png", path = "Resultados",
+       width = 6, height = 2, units = "in")
+
 
 #===== CATEGORIA 2 =====#
 
@@ -413,6 +417,8 @@ count_cat2$Category <- factor(count_cat2$Category,
 # ggplot2
 ggplot(count_cat2, aes(x = Category, y = prop_cat2))+
   geom_bar(stat = "identity", fill = "#15041c") +
-  geom_label(aes(x = Category, y = prop_cat2, label = prop_cat2))+
+  geom_label(aes(x = Category, y = prop_cat2, label = prop_cat2), size = 2.5)+
   labs(y = "Porcentagem", x = "", title = "") +
   coord_flip()
+ggsave("prop_voz_cat2.png", path = "Resultados",
+       width = 7, height = 3, units = "in")
