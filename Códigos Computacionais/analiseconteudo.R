@@ -13,13 +13,8 @@
 #install.packages(c("RQDA","GGally", "network", "sna"), dependencies = T)
 
 # carregar pacotes
-library(GGally); library(network); library(sna); library(ggplot2); library(RQDA); library(readxl)
-library(RQDA); library(dplyr); library(stringr); library(ggplot2); library(networkD3)
-
-# executar pacote RQDA (p/ analise de conteudo)
-RQDA()
-
-# *Abra o projeto no RQDA para executar os demais codigos*
+library(GGally); library(network); library(sna); library(ggplot2); library(readxl)
+library(dplyr); library(stringr); library(ggplot2); library(networkD3)
 
 #==================================#
 # CAPTURA DOS DADOS DA CODIFICACAO
@@ -235,6 +230,14 @@ network_tema_cat <-
                fontFamily = "serif", colourScale = JS(ColourScale) )
 network_tema_cat
 saveNetwork(network_tema_cat ,file = 'network_tema_categoria_all.html', selfcontained=TRUE)
+
+# visualizar conflito
+conflito <- data_flow_mani[str_detect(data_flow_mani$Var1, "CONFLITO"),]
+conflito <- mutate(conflito, prop = round((Freq / sum(Freq)*100), 2) )
+
+# visualizar cooperacao
+coop <- data_flow_mani[str_detect(data_flow_mani$Var1, "COOP"),]
+conflito <- mutate(conflito, prop = round((Freq / sum(Freq)*100), 2) )
 
 # From these flows we need to create a node data frame: it lists every entities involved in the flow
 # nodes=data.frame(name=c(as.character(links$source), as.character(links$target)) %>% unique())
