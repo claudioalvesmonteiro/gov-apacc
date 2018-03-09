@@ -69,7 +69,7 @@ ggplot(freq_genero, aes(x = cat, y = prop))+
   scale_fill_manual("Sexo" ,values=c("Homem" = "#15041c", "Mulher" =  "lightgreen"))+
   labs(x ="", y = "Porcent. de Representantes") +
   coord_flip()
-ggsave("Resultados/barapacc_sex.png", width = 7, height =3, units = "in")
+ggsave("Resultados/barapacc_sex.png", width = 7, height =2, units = "in")
 
 
 #======================================#

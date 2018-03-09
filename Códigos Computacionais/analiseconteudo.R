@@ -14,7 +14,9 @@
 
 # carregar pacotes
 library(GGally); library(network); library(sna); library(ggplot2); library(readxl)
-library(dplyr); library(stringr); library(ggplot2); library(networkD3)
+library(dplyr); library(stringr); library(ggplot2); library(networkD3); library(RQDA)
+
+
 
 #==================================#
 # CAPTURA DOS DADOS DA CODIFICACAO
@@ -48,7 +50,7 @@ cont_cod_tema$prop_tema2 <- paste(round(cont_cod_tema$prop_tema, 2), "%", sep=""
 
 # renomear colunas
 cont_cod_tema <- mutate(cont_cod_tema, nomes_temas = Var1)
-cont_cod_tema$nomes_temas <- c("Educa??o Socioambiental", "Fiscaliza??o e Monitoramento", "Institucional APACC", "Institucional CONAPAC",
+cont_cod_tema$nomes_temas <- c("Educação Socioambiental", "Fiscalização e Monitoramento", "Institucional APACC", "Institucional CONAPAC",
                                  "Plano de Manejo", "Recursos Financeiros", "Zoneamento")
 
 # ordenar
@@ -58,7 +60,7 @@ cont_cod_tema$nomes_temas <- factor(cont_cod_tema$nomes_temas, levels = cont_cod
 ggplot(cont_cod_tema, aes(x = nomes_temas, y = prop_tema))+
   geom_bar(stat = "identity", fill = "#15041c") +
   geom_label(aes(x = nomes_temas, y = prop_tema, label = prop_tema2), size = 2.3)+
-  labs(y = "Propor??o", x = "", title = "") +
+  labs(y = "Procentagem do Total", x = "", title = "") +
   coord_flip()
 ggsave("prop_debate_tema.png", path = "Resultados",
        width = 7, height = 3, units = "in")
@@ -208,7 +210,7 @@ data_flow2 <- data_flow_mani[data_flow_mani$Freq > 1,]
 # https://christophergandrud.github.io/networkD3/
 
 ColourScale <- 'd3.scaleOrdinal()
-            .domain(["Categoria de An?lise", "Tema de Debate"])
+            .domain(["Categoria de Análise", "Tema de Debate"])
            .range(["#FF6900", "#694489"]);'
 
 #===== SANKEYNETWORK =====#
@@ -226,14 +228,16 @@ network_tema_cat <-
   forceNetwork(data_flow_mani, Nodes = nomes, Source = "IDsource",  Target = "IDtarget",
                Value = "Freq",  NodeID = "nome_nod",  Group = "grupos",
                opacityNoHover = 1, linkDistance = 300, opacity = 0.9, legend = T,  
-               height = 500, width = 700, zoom = TRUE , fontSize = 12,                                                    
+               height = 600, width = 600, zoom = TRUE , fontSize = 12,                                                    
                fontFamily = "serif", colourScale = JS(ColourScale) )
 network_tema_cat
 saveNetwork(network_tema_cat ,file = 'network_tema_categoria_all.html', selfcontained=TRUE)
 
 # visualizar conflito
-conflito <- data_flow_mani[str_detect(data_flow_mani$Var1, "CONFLITO"),]
+conflito <- data_flow_mani[str_detect(data_flow_mani$Var1, "CONFLITO") |
+                             str_detect(data_flow_mani$Var2, "57") ,]
 conflito <- mutate(conflito, prop = round((Freq / sum(Freq)*100), 2) )
+conflito <- conflito[order(conflito$prop),]
 
 # visualizar cooperacao
 coop <- data_flow_mani[str_detect(data_flow_mani$Var1, "COOP"),]
@@ -353,6 +357,7 @@ saveNetwork(network_rep_atua, file = 'Resultados/network_rep_atua.html', selfcon
 paste_voz<- c("cat_", "tema_", "DESTAQUES", "DUVIDA_", "atua_", "DECISOES", "termo_")
 cont_cod_data <- mutate(cont_cod_data, select_voz = 1)
 cont_cod_data$select_voz[str_detect(cont_cod_data$Var1, paste(paste_voz, collapse = '|'))] <- 2
+
 codes_represent <- cont_cod_data[cont_cod_data$select_voz == 1,]
 
 # importar base de instituicoes por representante
@@ -406,14 +411,21 @@ count_cat1$Category <- factor(count_cat1$Category,
 
 count_cat1$prop_cat1.2 <- paste(round(count_cat1$prop_cat1, 2), "%", sep="")
 
+count_cat1$categoria_inst <- c("Sociedade Civil", "Sociedade Civil","Poder Público", "Poder Público",
+                               "Sociedade Civil", "Sociedade Civil")
+
 
 # ggplot2
 ggplot(count_cat1, aes(x = Category, y = prop_cat1))+
-  geom_bar(stat = "identity", fill = "#15041c") +
+  geom_bar(stat = "identity", aes(fill = count_cat1$categoria_ins)) +
+  scale_fill_manual("Categoria",values=c("#15041c", "lightgreen"))+
   geom_label(aes(x = Category, y = prop_cat1, label = prop_cat1.2), size = 2.5)+
-  labs(y = "Porcentagem", x = "", title = "") +
-  coord_flip()
-ggsave("prop_voz_cat1.png", path = "Resultados",
+  labs(y = "Porcentagem do Total", x = "", title = "") +
+  coord_flip()+
+  theme_minimal()%+replace% 
+  theme(legend.position="bottom")
+
+ggsave("prop_voz_cat.png", path = "Resultados",
        width = 8, height = 3, units = "in")
 
 
@@ -442,5 +454,11 @@ ggsave("prop_voz_cat2.png", path = "Resultados",
        width = 8, height = 3, units = "in")
 
 
-#=================================================#
-# A
+#====================================
+# IDENT MEMO
+
+c("formato atual as mesmas não têm")
+
+
+codingBySearch("contratação de serviços e produção de material de divulgação",fid=getFileIds(),cid=130)
+
