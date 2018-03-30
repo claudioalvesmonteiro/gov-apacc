@@ -4,7 +4,7 @@
 # ANALISE DE CONTEUDO DAS MEMORIAS               #
 # Recife - Pernambuco - Brasil                   #
 #------------------------------------------------#
-# Funda??o Joaquim Nabuco (FUNDAJ)               #
+# Fundacao Joaquim Nabuco (FUNDAJ)               #
 #------------------------------------------------#
 # Claudio A. Monteiro                            #
 # claudiomonteirol.a@gmail.com                   #
@@ -16,6 +16,8 @@
 library(GGally); library(network); library(sna); library(ggplot2); library(readxl)
 library(dplyr); library(stringr); library(ggplot2); library(networkD3); library(RQDA)
 
+# 
+library(RQDA)
 
 
 #==================================#
@@ -35,28 +37,32 @@ coding_table <- getCodingTable()
 #================================# 
 
 # selecionar contagem de temas
-cont_cod_data <- mutate(cont_cod_data, tema = 0)
-cont_cod_data$tema[str_detect(cont_cod_data$Var1, "tema_")] <- 1
-cont_cod_tema <- cont_cod_data[cont_cod_data$tema == 1,]
 
-# selecionar contagem de temas
+# criar variavel 'tema' no banco 'cont_cod_data'
 cont_cod_data <- mutate(cont_cod_data, tema = 0)
+
+# detectar termo 'tema_' na varivael 'Var1' e atribuir valor 1 a variavel 'tema'
 cont_cod_data$tema[str_detect(cont_cod_data$Var1, "tema_")] <- 1
+
+# selecionar os casos em que tema = 1
 cont_cod_tema <- cont_cod_data[cont_cod_data$tema == 1,]
 
 # calcular proporcao e arredondar
 cont_cod_tema <- mutate(cont_cod_tema, prop_tema = (Freq / sum(Freq))*100 )
+
+# criar variavel de prop com "%" 
 cont_cod_tema$prop_tema2 <- paste(round(cont_cod_tema$prop_tema, 2), "%", sep="")
 
-# renomear colunas
+# criar uma nova variavel com nomes dos temas
 cont_cod_tema <- mutate(cont_cod_tema, nomes_temas = Var1)
-cont_cod_tema$nomes_temas <- c("Educação Socioambiental", "Fiscalização e Monitoramento", "Institucional APACC", "Institucional CONAPAC",
-                                 "Plano de Manejo", "Recursos Financeiros", "Zoneamento")
+cont_cod_tema$nomes_temas <- c("EducaÃ§Ã£o Socioambiental", "FiscalizaÃ§Ã£o e Monitoramento", "Institucional APACC", 
+                               "Institucional CONAPAC", "Plano de Manejo", "Recursos Financeiros", "Zoneamento")
 
 # ordenar
-cont_cod_tema$nomes_temas <- factor(cont_cod_tema$nomes_temas, levels = cont_cod_tema$nomes_temas[order(cont_cod_tema$prop_tema)])
+cont_cod_tema$nomes_temas <- factor(cont_cod_tema$nomes_temas, 
+                                    levels = cont_cod_tema$nomes_temas[order(cont_cod_tema$prop_tema)])
 
-# visualizar graficamente
+# visualizar graficamente e salvar
 ggplot(cont_cod_tema, aes(x = nomes_temas, y = prop_tema))+
   geom_bar(stat = "identity", fill = "#15041c") +
   geom_label(aes(x = nomes_temas, y = prop_tema, label = prop_tema2), size = 2.3)+
@@ -210,7 +216,7 @@ data_flow2 <- data_flow_mani[data_flow_mani$Freq > 1,]
 # https://christophergandrud.github.io/networkD3/
 
 ColourScale <- 'd3.scaleOrdinal()
-            .domain(["Categoria de Análise", "Tema de Debate"])
+            .domain(["Categoria de An?lise", "Tema de Debate"])
            .range(["#FF6900", "#694489"]);'
 
 #===== SANKEYNETWORK =====#
@@ -361,7 +367,7 @@ cont_cod_data$select_voz[str_detect(cont_cod_data$Var1, paste(paste_voz, collaps
 codes_represent <- cont_cod_data[cont_cod_data$select_voz == 1,]
 
 # importar base de instituicoes por representante
-insti_categorias <- read_excel("Dados/instituições_apacc_2.0.xlsx")
+insti_categorias <- read_excel("Dados/institui??es_apacc_2.0.xlsx")
 
 #==== match nomes dos representantes =====#
 
@@ -381,7 +387,7 @@ data_rep_nconsel <- codes_represent[str_detect(codes_represent$nome_consel, "1")
 #write.csv(data_rep_nconsel, file = "Dados/data_rep_nconsel.csv")
 
 # importar base editada manulamente
-data_rep_nconsel <- read_excel("Dados/intituições_apacc3.xlsx")
+data_rep_nconsel <- read_excel("Dados/intitui??es_apacc3.xlsx")
 
 #==== megir bases representantes ====#
 base_representantes <- rbind(data_rep_nconsel, data_consel[,-c(5,7)])
@@ -403,7 +409,7 @@ count_cat1 <- aggregate(base_rep_sem_icmbio$Freq, by=list(Category=base_rep_sem_
 count_cat1 <- mutate(count_cat1, prop_cat1 = (x / sum(x))*100 )
 
 # renomear categoria 6
-count_cat1$Category[6] <- "Organizações de educação, cultura  \n  e associações comunitárias"
+count_cat1$Category[6] <- "Organiza??es de educa??o, cultura  \n  e associa??es comunit?rias"
 
 # ordenar
 count_cat1$Category <- factor(count_cat1$Category, 
@@ -411,7 +417,7 @@ count_cat1$Category <- factor(count_cat1$Category,
 
 count_cat1$prop_cat1.2 <- paste(round(count_cat1$prop_cat1, 2), "%", sep="")
 
-count_cat1$categoria_inst <- c("Sociedade Civil", "Sociedade Civil","Poder Público", "Poder Público",
+count_cat1$categoria_inst <- c("Sociedade Civil", "Sociedade Civil","Poder P?blico", "Poder P?blico",
                                "Sociedade Civil", "Sociedade Civil")
 
 
@@ -457,8 +463,8 @@ ggsave("prop_voz_cat2.png", path = "Resultados",
 #====================================
 # IDENT MEMO
 
-c("formato atual as mesmas não têm")
+c("formato atual as mesmas n?o t?m")
 
 
-codingBySearch("contratação de serviços e produção de material de divulgação",fid=getFileIds(),cid=130)
+codingBySearch("contrata??o de servi?os e produ??o de material de divulga??o",fid=getFileIds(),cid=130)
 
