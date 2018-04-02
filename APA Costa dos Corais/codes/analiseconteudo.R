@@ -19,7 +19,6 @@ library(dplyr); library(stringr); library(ggplot2); library(networkD3); library(
 # 
 library(RQDA)
 
-
 #==================================#
 # CAPTURA DOS DADOS DA CODIFICACAO
 
