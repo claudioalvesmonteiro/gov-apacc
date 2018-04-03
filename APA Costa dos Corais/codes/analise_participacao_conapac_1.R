@@ -137,18 +137,18 @@ data_flow$IDsource = match(data_flow$nod_cod, nomes$nod_cod)-1
 data_flow$IDtarget = match(data_flow$Var2, nomes$nod_cod)-1
 
 #===== selecionar relacoes entre temas e codigos =====#
-#data_flow <- mutate(data_flow, IN = "")
-#data_flow$IN[str_detect(data_flow$Var1, "tema_")] <- "TEMA" 
-#data_flow$IN[str_detect(data_flow$Var1, "cat_")] <- "CAT" 
+data_flow <- mutate(data_flow, IN = "")
+data_flow$IN[str_detect(data_flow$Var1, "tema_")] <- "TEMA" 
+data_flow$IN[str_detect(data_flow$Var1, "cat_")] <- "CAT" 
 
-#data_flow <- mutate(data_flow, OUT = "")
-#paste_cat <- nomes$nod_cod[str_detect(nomes$Var1, "cat_")]
-#paste_tema <- nomes$nod_cod[str_detect(nomes$Var1, "tema_")]
-#data_flow$OUT[str_detect(data_flow$Var2, paste(paste_cat, collapse = '|'))] <- "CAT"
-#data_flow$OUT[str_detect(data_flow$Var2, paste(paste_tema, collapse = '|'))] <- "TEMA"
+data_flow <- mutate(data_flow, OUT = "")
+paste_cat <- nomes$nod_cod[str_detect(nomes$Var1, "cat_")]
+paste_tema <- nomes$nod_cod[str_detect(nomes$Var1, "tema_")]
+data_flow$OUT[str_detect(data_flow$Var2, paste(paste_cat, collapse = '|'))] <- "CAT"
+data_flow$OUT[str_detect(data_flow$Var2, paste(paste_tema, collapse = '|'))] <- "TEMA"
 
-#data_flow <- mutate(data_flow, select = ifelse(IN == OUT, 1, 0))
-#data_flow <- data_flow[data_flow$select == 0,]
+data_flow <- mutate(data_flow, select = ifelse(IN == OUT, 1, 0))
+data_flow <- data_flow[data_flow$select == 0,]
 
 data_flow_mani <- data_flow[data_flow$Freq != 0,]
 data_flow2 <- data_flow_mani[data_flow_mani$Freq > 1,]

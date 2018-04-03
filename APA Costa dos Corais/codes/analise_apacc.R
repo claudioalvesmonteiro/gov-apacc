@@ -12,7 +12,7 @@
 
 # carregar pacotes
 library(GGally); library(network); library(sna); library(ggplot2); library(RQDA); library(readxl)
-library(dplyr); library(stringr); library(ggplot2); library(networkD3)
+library(dplyr); library(stringr); library(ggplot2); library(networkD3); library(stringi)
 
 # carregue o pacote RQDA e abra 'projeto_apacc.rqda'
 library(RQDA)
@@ -82,11 +82,11 @@ cont_cod_tema$nomes_temas <- factor(cont_cod_tema$nomes_temas,
 # visualizar graficamente e salvar
 ggplot(cont_cod_tema, aes(x = nomes_temas, y = prop_tema))+
   geom_bar(stat = "identity", fill = "#15041c") +
-  geom_label(aes(x = nomes_temas, y = prop_tema, label = prop_tema2), size = 3.3)+
+  geom_label(aes(x = nomes_temas, y = prop_tema, label = prop_tema2), size = 3.8)+
   labs(y = "Procentagem do Total", x = "", title = "") +
   tema_massa()+
   coord_flip()+
-  ggsave("prop_debate_tema.png", path = "outputs", width = 7, height = 3, units = "in")
+  ggsave("prop_debate_tema.png", path = "outputs", width = 8, height = 4, units = "in")
 
 #======================================#
 #     ANALISE DE VOZ NOS DEBATES       #
@@ -126,7 +126,8 @@ base_representantes <- rbind(represent_nao_consel, data_consel[,-c(5,7, 8)])
 count_cat1 <- aggregate(base_representantes$Freq, by=list(Category=base_representantes$categoria1), FUN=sum)
 
 # sem os gestores
-base_rep_sem_icmbio <- base_representantes[base_representantes$entidade_sigla != "ICMBIO",]
+paste_gestao <- c("iran campello normande", "jose ulisses dos santos", "paulo roberto correa de souza junior")
+base_rep_sem_icmbio <- base_representantes[!str_detect(base_representantes$nome_consel, paste(paste_gestao, collapse = '|')),] 
 count_cat1 <- aggregate(base_rep_sem_icmbio$Freq, by=list(Category=base_rep_sem_icmbio$categoria1), FUN=sum)
 
 # transformar em prop 
@@ -148,12 +149,12 @@ count_cat1$categoria_inst <- c("Sociedade Civil", "Sociedade Civil","Poder Públi
 ggplot(count_cat1, aes(x = Category, y = prop_cat1))+
   geom_bar(stat = "identity", aes(fill = count_cat1$categoria_ins)) +
   scale_fill_manual("Categoria",values=c("#15041c", "lightgreen"))+
-  geom_label(aes(x = Category, y = prop_cat1, label = prop_cat1.2), size = 2.5)+
+  geom_label(aes(x = Category, y = prop_cat1, label = prop_cat1.2), size = 3.8)+
   labs(y = "Porcentagem do Total", x = "", title = "") +
   coord_flip()+
   tema_massa()%+replace% 
   theme(legend.position="bottom")+
-  ggsave("prop_voz_cat.png", path = "outputs", width = 8, height = 3, units = "in")
+  ggsave("prop_voz_cat.png", path = "outputs", width = 9, height = 4, units = "in")
 
 #==== Proporcional ao Numero de Assentos ====#
 
@@ -164,8 +165,23 @@ cont_assento <- data.frame(table(consel_insti$categoria1))
 cont_assento$Category <- as.character(cont_assento$Var1)
 cont_rep_prop <- merge(cont_assento, count_cat1, by = "Category")
 
-# FAZER PROP
-cont_rep_prop$prop <- cont_rep_prop$x / cont_rep_prop$Freq
+# proporcional ao numero de assentos
+cont_rep_prop <- mutate(cont_rep_prop, prop_assento = round((cont_rep_prop$x / cont_rep_prop$Freq), 2))
+
+# ordenar
+cont_rep_prop$Category <- factor(cont_rep_prop$Category, 
+                              levels = cont_rep_prop$Category[order(cont_rep_prop$prop_assento)])
+
+# ggplot
+ggplot(cont_rep_prop, aes(x = Category, y = prop_assento))+
+  geom_bar(stat = "identity", aes(fill = cont_rep_prop$categoria_ins)) +
+  scale_fill_manual("Categoria",values=c("#15041c", "lightgreen"))+
+  geom_label(aes(label = prop_assento), size = 3.8)+
+  labs(y = "Número de Situações de Fala por Assento", x = "", title = "") +
+  coord_flip()+
+  tema_massa()%+replace% 
+  theme(legend.position="bottom")+
+  ggsave("prop_voz_Assento.png", path = "outputs", width = 9, height = 4, units = "in")
 
 #=====================#
 # Genero              #
