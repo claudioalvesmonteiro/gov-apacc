@@ -33,7 +33,7 @@ tema_massa <- function(base_size = 12, base_family = "") {
 # carregar bases
 apacc_atas <- read_excel("data/Listas Presença Conselho APACC.xlsx")
 consel_insti <- read_excel("data/instituições_apacc_2.0.xlsx")
-represent_nao_consel <- read_excel("data/intituições_apacc3.xlsx")
+represent_nao_consel  <- read_excel("data/intituições_apacc3.xlsx")
 
 #==========================================#
 # Manipulacao dos dados da codificacao     #
@@ -114,7 +114,7 @@ data_rep_nconsel <- codes_represent[str_detect(codes_represent$nome_consel, "1")
 #write.csv(data_rep_nconsel, file = "Dados/data_rep_nconsel2.csv")
 
 #---- megir bases representantes ----#
-base_representantes <- rbind(data_rep_nconsel, data_consel[,-c(5,7, 8)])
+base_representantes <- rbind(represent_nao_consel, data_consel[,-c(5,7, 8)])
 #write.csv(base_representantes, file = "Dados/base_representantes_voz.csv")
 
 #==== contagem das falas ====#
@@ -150,12 +150,19 @@ ggplot(count_cat1, aes(x = Category, y = prop_cat1))+
   coord_flip()+
   tema_massa()%+replace% 
   theme(legend.position="bottom")+
-  ggsave("prop_voz_cat.png", path = "Resultados", width = 8, height = 3, units = "in")
+  ggsave("prop_voz_cat.png", path = "outputs", width = 8, height = 3, units = "in")
 
 #==== Proporcional ao Numero de Assentos ====#
 
 # Contagem de assentos
 cont_assento <- data.frame(table(consel_insti$categoria1)) 
+
+# mergir bases
+cont_assento$Category <- as.character(cont_assento$Var1)
+cont_rep_prop <- merge(cont_assento, count_cat1, by = "Category")
+
+# FAZER PROP
+cont_rep_prop$prop <- cont_rep_prop$x / cont_rep_prop$Freq
 
 #=====================#
 # Genero              #
