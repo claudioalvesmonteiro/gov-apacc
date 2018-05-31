@@ -167,6 +167,9 @@ cont_rep_prop <- merge(cont_assento, count_cat1, by = "Category")
 # FAZER PROP
 cont_rep_prop$prop <- cont_rep_prop$x / cont_rep_prop$Freq
 
+# unique
+x <- unique(apacc_atas[c("nome_consel", "entidade_sigla")])
+
 #=====================#
 # Genero              #
 #=====================#
