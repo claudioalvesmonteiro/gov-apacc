@@ -55,7 +55,7 @@ lapply(myfiles, function(i) system(paste('"/home/pacha/Downloads/xpdf-tools-linu
 library(RQDA)
 RQDA()
 
-addFilesFromDir(diretorio, pattern = "*.txt$")
++addFilesFromDir(diretorio, pattern = "*.txt$")
 
 
 
