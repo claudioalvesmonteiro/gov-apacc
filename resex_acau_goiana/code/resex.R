@@ -55,9 +55,6 @@ lapply(myfiles, function(i) system(paste('"/home/pacha/Downloads/xpdf-tools-linu
 library(RQDA)
 RQDA()
 
-+addFilesFromDir(diretorio, pattern = "*.txt$")
-
-
 #==================================#
 # CAPTURA DOS DADOS DA CODIFICACAO
 
