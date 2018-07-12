@@ -118,5 +118,3 @@ ggsave("prop_voz_cat2_RESEX.png", path = "resex_acau_goiana/resultados", width =
 
 
 
-
-
