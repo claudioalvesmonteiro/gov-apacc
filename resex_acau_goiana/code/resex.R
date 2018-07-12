@@ -76,11 +76,36 @@ conselInsti<- gsheet2tbl('https://docs.google.com/spreadsheets/d/1Z6LriQeZpTg5M7
 
 ######################################
 
-# mergir bases
+#============= mergir bases ==================#
 cont_cod_data$cod_representante <- cont_cod_data$Var1
 conselInsti$cod_representante <- paste0(conselInsti$nome_representante, conselInsti$instituicao_sigla)
 
 resexData <- merge(cont_cod_data, conselInsti, by = "cod_representante", all = T)
+
+#=======================#
+# ANALISE DOS DADOS
+
+# remover codes quali
+resexDatax <- resexData[!is.na(resexData$instituicao_sigla),]
+
+# renomear codes NA
+resexDatax$obs[is.na(resexDatax$obs)] <- "conselheirx"
+
+# remover analistas e chefes
+resexDatax <- resexDatax[resexDatax$obs != "analista",]
+resexDatax <- resexDatax[resexDatax$obs != "chefe",]
+
+# agrupar por grupo
+grupoData <- aggregate(resexDatax$Freq, by = list(resexDatax$categoria1), sum)
+
+# ggplot2
+ggplot(grupoData, aes(x = Group.1, y = x))+
+  geom_bar(stat = "identity", fill = "#15041c") +
+  geom_label(aes(label = x), size = 3.2)+
+  labs(y = "Situações de Fala", x = "", title = "") +
+  coord_flip()
+ggsave("prop_voz_cat2.png", path = "Resultados",
+       width = 8, height = 3, units = "in")
 
 
 
