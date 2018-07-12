@@ -58,5 +58,43 @@ RQDA()
 +addFilesFromDir(diretorio, pattern = "*.txt$")
 
 
+#==================================#
+# CAPTURA DOS DADOS DA CODIFICACAO
+
+# visualizar a contagem de cada codigo
+sumario_cod <- summaryCodings()
+
+# contagem de cada codigo
+cont_cod_data <- data.frame(sumario_cod$NumOfCoding)
+
+# visualizar infos sobre cada codificacao
+coding_table <- getCodingTable()
+
+
+#====================================#
+# DADOS DAS INSTITUICOES
+
+library(gsheet)
+conselInsti<- gsheet2tbl('https://docs.google.com/spreadsheets/d/1Z6LriQeZpTg5M7n9FmksAwgdumljIIgQn_4D504rAtk/edit?usp=sharing')
+
+######################################
+
+# mergir bases
+cont_cod_data$cod_representante <- cont_cod_data$Var1
+conselInsti$cod_representante <- paste0(conselInsti$nome_representante, conselInsti$instituicao_sigla)
+
+resexData <- merge(cont_cod_data, conselInsti, by = "cod_representante", all = T)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
