@@ -108,11 +108,12 @@ ggplot(grupoData, aes(x = Group.1, y = x))+
 ggsave("prop_voz_cat2_RESEX.png", path = "resex_acau_goiana/resultados", width = 7, height = 3, units = "in")
 
 
-
-
-
-
-
+# 22 beneficiarios + 1 CPP
+# 6 empresas
+# 11 governo + 1 Jorge Ricardo - 3 univ e fundaj
+#
+#
+#
 
 
 
