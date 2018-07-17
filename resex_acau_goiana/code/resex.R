@@ -71,6 +71,8 @@ coding_table <- getCodingTable()
 #====================================#
 # DADOS DAS INSTITUICOES
 
+#
+install.packages("gsheet")
 library(gsheet)
 conselInsti<- gsheet2tbl('https://docs.google.com/spreadsheets/d/1Z6LriQeZpTg5M7n9FmksAwgdumljIIgQn_4D504rAtk/edit?usp=sharing')
 
@@ -98,6 +100,8 @@ resexDatax <- resexDatax[resexDatax$obs != "chefe",]
 # agrupar por grupo
 grupoData <- aggregate(resexDatax$Freq, by = list(resexDatax$categoria1), sum)
 
+library(ggplot2)
+
 # ggplot2
 ggplot(grupoData, aes(x = Group.1, y = x))+
   geom_bar(stat = "identity", fill = "#15041c") +
@@ -105,17 +109,9 @@ ggplot(grupoData, aes(x = Group.1, y = x))+
   labs(y = "Número Situações de Fala", x = "", title = "Situações de Fala na RESEX Acaú-Goiana") +
   coord_flip()
 
-ggsave("prop_voz_cat2_RESEX.png", path = "resex_acau_goiana/resultados", width = 7, height = 3, units = "in")
+ggsave("prop_voz_cat2_RESEX.png", path = "resex_acau_goiana/resultados", width = 7, height = 3, units = "in")[]
 
-
-# 22 beneficiarios + 1 CPP
+# 22 beneficiarios
+# CPP ONG
 # 6 empresas
 # 11 governo + 1 Jorge Ricardo - 3 univ e fundaj
-#
-#
-#
-
-
-
-
-
