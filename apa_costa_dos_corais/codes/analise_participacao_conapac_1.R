@@ -51,7 +51,7 @@ cont_cod_tema$prop_tema2 <- paste(round(cont_cod_tema$prop_tema, 2), "%", sep=""
 
 # criar uma nova variavel com nomes dos temas
 cont_cod_tema <- mutate(cont_cod_tema, nomes_temas = Var1)
-cont_cod_tema$nomes_temas <- c("Educação Socioambiental", "Fiscalização e Monitoramento", "Institucional APACC", 
+cont_cod_tema$nomes_temas <- c("Educa??o Socioambiental", "Fiscaliza??o e Monitoramento", "Institucional APACC", 
                                "Institucional CONAPAC", "Plano de Manejo", "Recursos Financeiros", "Zoneamento")
 
 # ordenar
@@ -129,7 +129,7 @@ nomes <- merge(flow_unique, nomes, by = "nome_nod")
 
 # definir grupos
 nomes <- mutate(nomes, grupos = "")
-nomes$grupos[str_detect(nomes$nome_nod, "cat_")] <- "Categoria de Análise" 
+nomes$grupos[str_detect(nomes$nome_nod, "cat_")] <- "Categoria de An?lise" 
 nomes$grupos[str_detect(nomes$nome_nod, "tema_")] <- "Tema de Debate" 
 
 # criar IDs
@@ -159,7 +159,7 @@ data_flow2 <- data_flow_mani[data_flow_mani$Freq > 1,]
 # https://christophergandrud.github.io/networkD3/
 
 ColourScale <- 'd3.scaleOrdinal()
-            .domain(["Categoria de Análise", "Tema de Debate"])
+            .domain(["Categoria de An?lise", "Tema de Debate"])
            .range(["#FF6900", "#694489"]);'
 
 #===== SankeyNetwork =====#
@@ -311,7 +311,7 @@ cont_cod_data$select_voz[str_detect(cont_cod_data$Var1, paste(paste_voz, collaps
 codes_represent <- cont_cod_data[cont_cod_data$select_voz == 1,]
 
 # importar base de instituicoes por representante
-insti_categorias <- read_excel("data/instituições_apacc_2.0.xlsx")
+insti_categorias <- read_excel("data/institui??es_apacc_2.0.xlsx")
 
 #==== match nomes dos representantes =====#
 
@@ -331,7 +331,7 @@ data_rep_nconsel <- codes_represent[str_detect(codes_represent$nome_consel, "1")
 #write.csv(data_rep_nconsel, file = "Dados/data_rep_nconsel.csv")
 
 # importar base editada manulamente
-data_rep_nconsel <- read_excel("data/intituições_apacc3.xlsx")
+data_rep_nconsel <- read_excel("data/intituiÃ§Ãµes_apacc3.xlsx")
 
 #==== megir bases representantes ====#
 base_representantes <- rbind(data_rep_nconsel, data_consel[,-c(5,7, 8)])
@@ -353,7 +353,7 @@ count_cat1 <- aggregate(base_rep_sem_icmbio$Freq, by=list(Category=base_rep_sem_
 count_cat1 <- mutate(count_cat1, prop_cat1 = (x / sum(x))*100 )
 
 # renomear categoria 6
-count_cat1$Category[6] <- "Organizações de educação, cultura  \n  e associações comunitárias"
+count_cat1$Category[6] <- "Organiza??es de educa??o, cultura  \n  e associa??es comunit?rias"
 
 # ordenar
 count_cat1$Category <- factor(count_cat1$Category, 
@@ -361,7 +361,7 @@ count_cat1$Category <- factor(count_cat1$Category,
 
 count_cat1$prop_cat1.2 <- paste(round(count_cat1$prop_cat1, 2), "%", sep="")
 
-count_cat1$categoria_inst <- c("Sociedade Civil", "Sociedade Civil","Poder Público", "Poder Público",
+count_cat1$categoria_inst <- c("Sociedade Civil", "Sociedade Civil","Poder P?blico", "Poder P?blico",
                                "Sociedade Civil", "Sociedade Civil")
 
 
