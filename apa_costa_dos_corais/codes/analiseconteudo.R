@@ -19,6 +19,8 @@ library(dplyr); library(stringr); library(ggplot2); library(networkD3); library(
 # 
 library(RQDA)
 
+RQDA()
+
 #==================================#
 # CAPTURA DOS DADOS DA CODIFICACAO
 
@@ -138,7 +140,7 @@ ggplot(debate_area_cont, aes(x = nomes, y = prop_tema))+
 crosscod1 <- c(as.character(cont_cod_data$Var1[str_detect(cont_cod_data$Var1, "tema_")]),
 as.character(cont_cod_data$Var1[str_detect(cont_cod_data$Var1, "cat_")]))
 
-crosscod1 <- crosscod1[-12]
+#crosscod1 <- crosscod1[-12]
 
 prox1_matrix <- crossCodes(codeList = crosscod1, 
                            data = coding_table, 
@@ -185,7 +187,7 @@ nomes <- merge(flow_unique, nomes, by = "nome_nod")
 
 # definir grupos
 nomes <- mutate(nomes, grupos = "")
-nomes$grupos[str_detect(nomes$nome_nod, "cat_")] <- "Categoria de An?lise" 
+nomes$grupos[str_detect(nomes$nome_nod, "cat_")] <- "Categoria de Análise" 
 nomes$grupos[str_detect(nomes$nome_nod, "tema_")] <- "Tema de Debate" 
 
 # criar IDs
@@ -207,7 +209,6 @@ data_flow$IDtarget = match(data_flow$Var2, nomes$nod_cod)-1
 #data_flow <- data_flow[data_flow$select == 0,]
 
 data_flow_mani <- data_flow[data_flow$Freq != 0,]
-data_flow2 <- data_flow_mani[data_flow_mani$Freq > 1,]
 
 
 # Make the Network
