@@ -14,7 +14,7 @@
 
 # carregar pacotes
 library(GGally); library(network); library(sna); library(ggplot2); library(readxl)
-library(dplyr); library(stringr); library(ggplot2); library(networkD3); library(RQDA); library(RQDA)
+library(dplyr); library(stringr); library(ggplot2); library(networkD3); library(RQDA); 
 
 #==================================#
 # CAPTURA DOS DADOS DA CODIFICACAO
