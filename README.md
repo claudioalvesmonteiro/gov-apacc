@@ -2,7 +2,7 @@
 ##RESEX Acaú-Goiana e APA Costa dos Corais em Perspectiva Comparada
 
 ### FUNDAÇÃO JOAQUIM NABUCO (FUNDAJ)
-### Pro
+### Programa Institucional de Bolsas de Iniciação Científica (PIBIC)
 ### Recife, 2018
 
 INTRODUÇÃO
