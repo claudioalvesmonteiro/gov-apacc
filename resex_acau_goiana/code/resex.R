@@ -11,8 +11,8 @@
 #=====================================================================# 
 
 # carregar pacotes
-library(GGally); library(network); library(sna); library(ggplot2); library(RQDA); library(readxl)
-library(RQDA); library(dplyr); library(stringr); library(ggplot2); library(networkD3)
+library(sna); library(ggplot2); library(readxl)
+library(dplyr); library(stringr); library(stringi); library(gsheet)
 
 # tema para os graficos em ggplot
 tema_massa <- function(base_size = 12, base_family = "") {
@@ -30,26 +30,6 @@ tema_massa <- function(base_size = 12, base_family = "") {
           axis.line = element_line(size = 1, colour = "grey70"))
 }
 
-
-#===== Tranformar PDF em .txt =====#
-
-# diretorio dos arquivos
-diretorio <- "/home/pacha/Documents/git_projects/publicgov_environment/resex_acau_goiana/data"
-
-# vetor com lista dos arquivos pdf
-myfiles <- list.files(path = diretorio, pattern = "pdf",  full.names = TRUE)
-
-# remover espacos, caixa baixa e remover caracteres latinos, dos nomes dos arquivos
-sapply(myfiles, FUN = function(i){
-  file.rename(from = i, to =  paste0(dirname(i), "/", stri_trans_general(tolower(gsub(" ", "_", basename(i))),"Latin-ASCII")))
-})
-
-# novo vetor com lista dos arquivos pdf
-myfiles <- list.files(path = diretorio, pattern = "pdf",  full.names = TRUE)
-
-# aplicar ferramenta de conversao
-lapply(myfiles, function(i) system(paste('"/home/pacha/Downloads/xpdf-tools-linux-4.00/bin64/pdftotext"', 
-                                         paste0('"', i, '"')), wait = FALSE) )
 
 #==== RQDA ====#
 library(RQDA)
@@ -70,18 +50,21 @@ coding_table <- getCodingTable()
 
 #====================================#
 # DADOS DAS INSTITUICOES
+#====================================#
 
-#
-install.packages("gsheet")
-library(gsheet)
+# baixar dados da planilha google
 conselInsti<- gsheet2tbl('https://docs.google.com/spreadsheets/d/1Z6LriQeZpTg5M7n9FmksAwgdumljIIgQn_4D504rAtk/edit?usp=sharing')
 
-######################################
+# salvar planilha 
+write.csv(conselInsti, "resex_acau_goiana/data/conselInsti.csv", row.names = F)
 
 #============= mergir bases ==================#
+
+# colar nomes para codigo mergir
 cont_cod_data$cod_representante <- cont_cod_data$Var1
 conselInsti$cod_representante <- paste0(conselInsti$nome_representante, conselInsti$instituicao_sigla)
 
+# mergir
 resexData <- merge(cont_cod_data, conselInsti, by = "cod_representante", all = T)
 
 #=======================#
@@ -91,7 +74,7 @@ resexData <- merge(cont_cod_data, conselInsti, by = "cod_representante", all = T
 resexDatax <- resexData[!is.na(resexData$instituicao_sigla),]
 
 # renomear codes NA
-resexDatax$obs[is.na(resexDatax$obs)] <- "conselheirx"
+resexDatax$obs[is.na(resexDatax$obs)] <- "conselheiro"
 
 # remover analistas e chefes
 resexDatax <- resexDatax[resexDatax$obs != "analista",]
@@ -100,18 +83,45 @@ resexDatax <- resexDatax[resexDatax$obs != "chefe",]
 # agrupar por grupo
 grupoData <- aggregate(resexDatax$Freq, by = list(resexDatax$categoria1), sum)
 
-library(ggplot2)
+# ordenar
+grupoData$Group.1 <- factor(grupoData$Group.1, levels = grupoData$Group.1[order(grupoData$x)])
 
-# ggplot2
-ggplot(grupoData, aes(x = Group.1, y = x))+
+# criar proporcionalidade
+grupoData <- mutate(grupoData, proporcao = paste0( (round(((x/sum(x))*100), 1)),"%") )
+
+#--- variavel prop por assento ---#
+
+# numero de assentos (eleicoes resex)
+grupoData$numero_assento <- c(6, 23, 12,4)
+
+# prop por assento
+grupoData <- mutate(grupoData, prop_assento = (round(((x/numero_assento)), 1)) )
+
+# variavel resex
+grupoData$UC <- "RESEX Acaú-Goiana"
+
+# renomear variaveis
+colnames(grupoData)[1] <- "grupo_setorial"
+colnames(grupoData)[2] <- "numero_situacoes_de_fala"
+
+# salvar
+write.csv(grupoData, "analise_comparada/resex_fala_data.csv", row.names = F)
+
+#==== visualizalizao ====#
+ggplot(grupoData, aes(x = grupo_setorial, y = proporcao))+
   geom_bar(stat = "identity", fill = "#15041c") +
-  geom_label(aes(label = x), size = 3.2)+
-  labs(y = "Número Situações de Fala", x = "", title = "Situações de Fala na RESEX Acaú-Goiana") +
-  coord_flip()
+  geom_label(aes(label = proporcao), size = 3.2)+
+  labs(y = "Porcentagem do Total", x = "", title = "") +
+  coord_flip()+
+  theme_minimal()%+replace% 
+  theme(legend.position="bottom",
+        axis.text.x = element_text(colour= "black",size=11,hjust=.5,vjust=.5,face="plain"),
+        axis.text.y = element_text(colour="black",size=11,angle=0,hjust=1,vjust=0,face="plain"), 
+        axis.title.x = element_text(colour="black",size=14,angle=0,hjust=.5,vjust=0,face="plain"),
+        axis.title.y = element_text(colour="black",size=13,angle=90,hjust=0.5,vjust=0.6,face="plain"),
+        title = element_text(colour="black",size=12,angle=0,hjust=.5,vjust=.5,face="plain")
+  )
+  
 
-ggsave("prop_voz_cat2_RESEX.png", path = "resex_acau_goiana/resultados", width = 7, height = 3, units = "in")[]
+ggsave("prop_voz_RESEX.png", path = "resex_acau_goiana/resultados", width = 7, height = 3, units = "in")
 
-# 22 beneficiarios
-# CPP ONG
-# 6 empresas
-# 11 governo + 1 Jorge Ricardo - 3 univ e fundaj
