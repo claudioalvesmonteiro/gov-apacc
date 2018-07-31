@@ -1,5 +1,5 @@
-#PARTICIPAÇÃO SOCIAL NA GESTÃO DO MEIO AMBIENTE: 
-##RESEX Acaú-Goiana e APA Costa dos Corais em Perspectiva Comparada
+# PARTICIPAÇÃO SOCIAL NA GESTÃO DO MEIO AMBIENTE: 
+## RESEX Acaú-Goiana e APA Costa dos Corais em Perspectiva Comparada
 
 ### FUNDAÇÃO JOAQUIM NABUCO (FUNDAJ)
 ### Programa Institucional de Bolsas de Iniciação Científica (PIBIC)
