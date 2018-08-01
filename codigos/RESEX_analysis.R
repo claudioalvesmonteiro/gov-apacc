@@ -56,7 +56,7 @@ coding_table <- getCodingTable()
 conselInsti<- gsheet2tbl('https://docs.google.com/spreadsheets/d/1Z6LriQeZpTg5M7n9FmksAwgdumljIIgQn_4D504rAtk/edit?usp=sharing')
 
 # salvar planilha 
-write.csv(conselInsti, "resex_acau_goiana/data/conselInsti.csv", row.names = F)
+#write.csv(conselInsti, "resex_acau_goiana/data/conselInsti.csv", row.names = F)
 
 #============= mergir bases ==================#
 
@@ -87,7 +87,8 @@ grupoData <- aggregate(resexDatax$Freq, by = list(resexDatax$categoria1), sum)
 grupoData$Group.1 <- factor(grupoData$Group.1, levels = grupoData$Group.1[order(grupoData$x)])
 
 # criar proporcionalidade
-grupoData <- mutate(grupoData, proporcao = paste0( (round(((x/sum(x))*100), 1)),"%") )
+grupoData <- mutate(grupoData, proporcao_total = round(((x/sum(x))*100), 1) )
+grupoData <- mutate(grupoData, proporcao_total_label = paste0(proporcao_total,"%") )
 
 #--- variavel prop por assento ---#
 
@@ -97,15 +98,16 @@ grupoData$numero_assento <- c(6, 23, 12,4)
 # prop por assento
 grupoData <- mutate(grupoData, prop_assento = (round(((x/numero_assento)), 1)) )
 
-# variavel resex
+# variavel resex e categoria setor
 grupoData$UC <- "RESEX Acaú-Goiana"
+grupoData$grupo_setorial2 <- c("Sociedade Civil", "Sociedade Civil", "Poder Público", "Poder Público")
 
 # renomear variaveis
 colnames(grupoData)[1] <- "grupo_setorial"
 colnames(grupoData)[2] <- "numero_situacoes_de_fala"
 
 # salvar
-write.csv(grupoData, "analise_comparada/resex_fala_data.csv", row.names = F)
+write.csv(grupoData, "resultados/tabelas/resex_fala_data.csv", row.names = F)
 
 #==== visualizalizao ====#
 ggplot(grupoData, aes(x = grupo_setorial, y = proporcao))+

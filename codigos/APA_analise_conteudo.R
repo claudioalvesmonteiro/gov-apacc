@@ -16,6 +16,9 @@
 library(GGally); library(network); library(sna); library(ggplot2); library(readxl)
 library(dplyr); library(stringr); library(ggplot2); library(networkD3); library(RQDA); 
 
+# executar pacote
+RQDA()
+
 #==================================#
 # CAPTURA DOS DADOS DA CODIFICACAO
 
@@ -51,7 +54,7 @@ cont_cod_tema$prop_tema2 <- paste(round(cont_cod_tema$prop_tema, 2), "%", sep=""
 
 # criar uma nova variavel com nomes dos temas
 cont_cod_tema <- mutate(cont_cod_tema, nomes_temas = Var1)
-cont_cod_tema$nomes_temas <- c("Educa??o Socioambiental", "Fiscaliza??o e Monitoramento", "Institucional APACC", 
+cont_cod_tema$nomes_temas <- c("Educação Socioambiental", "Fiscalização e Monitoramento", "Institucional APACC", 
                                "Institucional CONAPAC", "Plano de Manejo", "Recursos Financeiros", "Zoneamento")
 
 # ordenar
@@ -67,8 +70,118 @@ ggplot(cont_cod_tema, aes(x = nomes_temas, y = prop_tema))+
 ggsave("prop_debate_tema.png", path = "outputs",
        width = 7, height = 3, units = "in")
 
+#======================================#
+#     ANALISE DE VOZ NOS DEBATES       #
+#======================================#
+
+#======== tratar dados =========#
+
+# selecionar codigos dos representantes
+paste_voz<- c("cat_", "tema_", "DESTAQUES", "DUVIDA_", "atua_", "DECISOES", "termo_", "tema2_")
+cont_cod_data <- mutate(cont_cod_data, select_voz = 1)
+cont_cod_data$select_voz[str_detect(cont_cod_data$Var1, paste(paste_voz, collapse = '|'))] <- 2
+
+codes_represent <- cont_cod_data[cont_cod_data$select_voz == 1,]
+
+# importar base de instituicoes por representante
+insti_categorias <- read_excel("resultados/tabelas/APA_instituicoes.xlsx")
+
+# limpar bases
+library(stringi)
+codes_represent$Var1 <- str_replace_all(codes_represent$Var1, "_", " ")
+codes_represent$Var1 <- stri_trans_general(codes_represent$Var1 , "Latin-ASCII")
+codes_represent$nome_consel <- as.character(codes_represent$Var1)
+
+insti_categorias$nome_consel <- stri_trans_general(insti_categorias$nome_consel , "Latin-ASCII")
+
+# mergir base de conselheiros
+data_consel <- merge(insti_categorias, codes_represent, by = "nome_consel")
+
+# criar e salvar base de representantes n-conselheiros
+data_rep_nconsel <- codes_represent[str_detect(codes_represent$nome_consel, "1"),]
+write.csv(data_rep_nconsel, file = "resultados/tabelas/APA_rep_nconsel.csv")
+
+# importar base de nao conselheiros
+data_rep_nconsel <- read_excel("resultados/tabelas/APA_instituicoes2.xlsx")
+
+#==== megir bases representantes ====#
+base_representantes <- rbind(data_rep_nconsel, data_consel[,-c(5,7, 8)])
+
+#===== ANALISE CATEGORIA 1 =====#
+
+# remover gestores ICMBio
+base_rep_sem_icmbio <- base_representantes[base_representantes$entidade_sigla != "ICMBIO",]
+dataGrupo <- aggregate(base_rep_sem_icmbio$Freq, by=list(grupo_setorial=base_rep_sem_icmbio$categoria1), FUN=sum)
+
+# inserir agricultura industria e comercio
+agri <- data.frame(grupo_setorial = c("Agricultura, Indústria e Comércio"),x = c(0)) 
+dataGrupo <- rbind(dataGrupo, agri)
+
+#---- inserir info de assentos ----#
+# http://www.icmbio.gov.br/apacostadoscorais/images/stories/conapac/Mem%C3%B3ria_18_reuni%C3%A3o_aprovada.pdf
+
+dataGrupo$numero_assento <- c(6, 6, 12, 8, 3, 3, 0) 
+dataGrupo <- mutate(dataGrupo, prop_assento = (round(((x/numero_assento)), 1)) )
+
+# proporcao em relacao ao total
+dataGrupo <- mutate(dataGrupo, proporcao_total = round(((x / sum(x))*100),1) )
+dataGrupo <- mutate(dataGrupo, proporcao_total_label = paste0(proporcao_total,"%") )
+
+# renomear categoria 6
+dataGrupo$grupo_setorial[6] <- "Organizações de Educação, Cultura  \n  e Associações Comunitárias"
+
+# renomear variavel
+colnames(dataGrupo)[2] <- "situacoes_de_fala"
+dataGrupo$UC <- "APA Costa dos Corais"
+
+# ordenar
+dataGrupo$grupo_setorial <- factor(dataGrupo$grupo_setorial, levels = dataGrupo$grupo_setorial[order(dataGrupo$situacoes_de_fala)])
+
+#inserir categorias
+dataGrupo$categoria_inst <- c("Sociedade Civil", "Sociedade Civil","Poder Público", "Poder Público",
+                              "Sociedade Civil", "Sociedade Civil", "Sociedade Civil")
+
+# salvar
+write.csv(dataGrupo, "resultados/tabelas/apa_fala_data.csv", row.names = F)
+
+#==== visualizar =====#
+ggplot(dataGrupo, aes(x = Category, y = prop_cat1))+
+  geom_bar(stat = "identity", aes(fill = dataGrupo$categoria_ins)) +
+  scale_fill_manual("Categoria",values=c("#15041c", "lightgreen"))+
+  geom_label(aes(x = Category, y = prop_cat1, label = prop_cat1.2), size = 2.5)+
+  labs(y = "Porcentagem do Total", x = "", title = "") +
+  coord_flip()+
+  theme_minimal()%+replace% 
+  theme(legend.position="bottom")
+ggsave("prop_voz_cat.png", path = "Resultados", width = 8, height = 3, units = "in")
+
+#===== ANALISE CATEGORIA 2 =====#
+
+# contar
+count_cat2 <- aggregate(base_representantes$Freq, by=list(Category=base_representantes$categoria2), FUN=sum)
+
+# sem os gestores
+count_cat2 <- aggregate(base_rep_sem_icmbio$Freq, by=list(Category=base_rep_sem_icmbio$categoria2), FUN=sum)
+
+# transformar em prop e ordenar
+count_cat2 <- mutate(count_cat2, prop_cat2 = (x / sum(x))*100 )
+count_cat2$prop_cat2 <- round(count_cat2$prop_cat2, 2)
+count_cat2$Category <- factor(count_cat2$Category, 
+                              levels = count_cat2$Category[order(count_cat2$prop_cat2)])
+count_cat2$prop_cat2.2 <- paste(round(count_cat2$prop_cat2, 2), "%", sep="")
+
+# ggplot2
+ggplot(count_cat2, aes(x = Category, y = prop_cat2))+
+  geom_bar(stat = "identity", fill = "#15041c") +
+  geom_label(aes(x = Category, y = prop_cat2, label = prop_cat2.2), size = 3.2)+
+  labs(y = "Porcentagem", x = "", title = "") +
+  coord_flip()
+ggsave("prop_voz_cat2.png", path = "Resultados",width = 8, height = 3, units = "in")
+
 #=================================================#
 #             RELACAO ENTRE CODIGOS               #
+#=================================================#
+#************* REVISAR TUDO ABAIXO ***************#                
 #=================================================#
 
 # funcao para relacionar codigos
@@ -80,7 +193,7 @@ ggsave("prop_debate_tema.png", path = "outputs",
 
 # selecionar codigos de temas e categorias
 crosscod1 <- c(as.character(cont_cod_data$Var1[str_detect(cont_cod_data$Var1, "tema_")]),
-as.character(cont_cod_data$Var1[str_detect(cont_cod_data$Var1, "cat_")]))
+               as.character(cont_cod_data$Var1[str_detect(cont_cod_data$Var1, "cat_")]))
 
 crosscod1 <- crosscod1[-12]
 
@@ -102,7 +215,7 @@ data_flow$Var1 <- as.character(data_flow$Var1)
 # definir nomes dos nodes
 nomes <- data.frame(nome_nod = crosscod1)
 nomes$nome_nod <- as.character(nomes$nome_nod)
-  
+
 flow_unique <- data_flow[!duplicated(data_flow$Var1),]
 
 # limpar base
@@ -159,8 +272,8 @@ data_flow2 <- data_flow_mani[data_flow_mani$Freq > 1,]
 # https://christophergandrud.github.io/networkD3/
 
 ColourScale <- 'd3.scaleOrdinal()
-            .domain(["Categoria de An?lise", "Tema de Debate"])
-           .range(["#FF6900", "#694489"]);'
+.domain(["Categoria de An?lise", "Tema de Debate"])
+.range(["#FF6900", "#694489"]);'
 
 #===== SankeyNetwork =====#
 sankeyNetwork(Links = data_flow_mani, Nodes = nomes,
@@ -212,8 +325,8 @@ crosscod2 <- cont_cod_data[cont_cod_data$select == 1,]
 crosscod2 <- as.character(crosscod2$Var1)
 
 include2_matrix <- crossCodes(codeList = crosscod2, 
-                           data = coding_table, 
-                           relation = "inclusion")
+                              data = coding_table, 
+                              relation = "inclusion")
 
 # transformar matrix em dataframe
 data_flow2 <- data.frame(as.table(include2_matrix))
@@ -298,111 +411,6 @@ network_rep_atua <-
 network_rep_atua
 
 saveNetwork(network_rep_atua, file = 'Resultados/network_rep_atua.html', selfcontained=TRUE)
-
-#======================================#
-#     ANALISE DE VOZ NOS DEBATES       #
-#======================================#
-
-# selecionar codigos dos representantes
-paste_voz<- c("cat_", "tema_", "DESTAQUES", "DUVIDA_", "atua_", "DECISOES", "termo_", "tema2_")
-cont_cod_data <- mutate(cont_cod_data, select_voz = 1)
-cont_cod_data$select_voz[str_detect(cont_cod_data$Var1, paste(paste_voz, collapse = '|'))] <- 2
-
-codes_represent <- cont_cod_data[cont_cod_data$select_voz == 1,]
-
-# importar base de instituicoes por representante
-insti_categorias <- read_excel("data/institui??es_apacc_2.0.xlsx")
-
-#==== match nomes dos representantes =====#
-
-# limpar bases
-library(stringi)
-codes_represent$Var1 <- str_replace_all(codes_represent$Var1, "_", " ")
-codes_represent$Var1 <- stri_trans_general(codes_represent$Var1 , "Latin-ASCII")
-codes_represent$nome_consel <- as.character(codes_represent$Var1)
-
-insti_categorias$nome_consel <- stri_trans_general(insti_categorias$nome_consel , "Latin-ASCII")
-
-# mergir base de conselheiros
-data_consel <- merge(insti_categorias, codes_represent, by = "nome_consel")
-
-# criar e salvar base de representantes n-conselheiros
-data_rep_nconsel <- codes_represent[str_detect(codes_represent$nome_consel, "1"),]
-#write.csv(data_rep_nconsel, file = "Dados/data_rep_nconsel.csv")
-
-# importar base editada manulamente
-data_rep_nconsel <- read_excel("data/intituições_apacc3.xlsx")
-
-#==== megir bases representantes ====#
-base_representantes <- rbind(data_rep_nconsel, data_consel[,-c(5,7, 8)])
-#write.csv(base_representantes, file = "Dados/base_representantes_voz.csv")
-
-#=================================#
-# Visualizacao grafica
-
-#===== CATEGORIA 1 =====#
-
-# contar
-count_cat1 <- aggregate(base_representantes$Freq, by=list(Category=base_representantes$categoria1), FUN=sum)
-
-# sem os gestores
-base_rep_sem_icmbio <- base_representantes[base_representantes$entidade_sigla != "ICMBIO",]
-count_cat1 <- aggregate(base_rep_sem_icmbio$Freq, by=list(Category=base_rep_sem_icmbio$categoria1), FUN=sum)
-
-# transformar em prop 
-count_cat1 <- mutate(count_cat1, prop_cat1 = (x / sum(x))*100 )
-
-# renomear categoria 6
-count_cat1$Category[6] <- "Organiza??es de educa??o, cultura  \n  e associa??es comunit?rias"
-
-# ordenar
-count_cat1$Category <- factor(count_cat1$Category, 
-                              levels = count_cat1$Category[order(count_cat1$prop_cat1)])
-
-count_cat1$prop_cat1.2 <- paste(round(count_cat1$prop_cat1, 2), "%", sep="")
-
-count_cat1$categoria_inst <- c("Sociedade Civil", "Sociedade Civil","Poder P?blico", "Poder P?blico",
-                               "Sociedade Civil", "Sociedade Civil")
-
-
-# ggplot2
-ggplot(count_cat1, aes(x = Category, y = prop_cat1))+
-  geom_bar(stat = "identity", aes(fill = count_cat1$categoria_ins)) +
-  scale_fill_manual("Categoria",values=c("#15041c", "lightgreen"))+
-  geom_label(aes(x = Category, y = prop_cat1, label = prop_cat1.2), size = 2.5)+
-  labs(y = "Porcentagem do Total", x = "", title = "") +
-  coord_flip()+
-  theme_minimal()%+replace% 
-  theme(legend.position="bottom")
-
-ggsave("prop_voz_cat.png", path = "Resultados",
-       width = 8, height = 3, units = "in")
-
-
-#===== CATEGORIA 2 =====#
-
-# contar
-count_cat2 <- aggregate(base_representantes$Freq, by=list(Category=base_representantes$categoria2), FUN=sum)
-
-# sem os gestores
-count_cat2 <- aggregate(base_rep_sem_icmbio$Freq, by=list(Category=base_rep_sem_icmbio$categoria2), FUN=sum)
-
-# transformar em prop e ordenar
-count_cat2 <- mutate(count_cat2, prop_cat2 = (x / sum(x))*100 )
-count_cat2$prop_cat2 <- round(count_cat2$prop_cat2, 2)
-count_cat2$Category <- factor(count_cat2$Category, 
-                              levels = count_cat2$Category[order(count_cat2$prop_cat2)])
-count_cat2$prop_cat2.2 <- paste(round(count_cat2$prop_cat2, 2), "%", sep="")
-
-# ggplot2
-ggplot(count_cat2, aes(x = Category, y = prop_cat2))+
-  geom_bar(stat = "identity", fill = "#15041c") +
-  geom_label(aes(x = Category, y = prop_cat2, label = prop_cat2.2), size = 3.2)+
-  labs(y = "Porcentagem", x = "", title = "") +
-  coord_flip()
-ggsave("prop_voz_cat2.png", path = "Resultados",
-       width = 8, height = 3, units = "in")
-
 
 #====================================
 # IDENT MEMO
