@@ -67,7 +67,7 @@ ggplot(cont_cod_tema, aes(x = nomes_temas, y = prop_tema))+
   geom_label(aes(x = nomes_temas, y = prop_tema, label = prop_tema2), size = 2.3)+
   labs(y = "Procentagem do Total", x = "", title = "") +
   coord_flip()
-ggsave("prop_debate_tema.png", path = "outputs",
+ggsave("prop_debate_tema.png", path = "resultados",
        width = 7, height = 3, units = "in")
 
 #======================================#
@@ -412,26 +412,29 @@ network_rep_atua
 
 saveNetwork(network_rep_atua, file = 'Resultados/network_rep_atua.html', selfcontained=TRUE)
 
-#====================================
-# IDENT MEMO
-
-c("formato atual as mesmas n?o t?m")
-
-
-codingBySearch("contrata??o de servi?os e produ??o de material de divulga??o",fid=getFileIds(),cid=130)
-
-
 #============================================#
 # Variacao de codigos nos arquivos (tempo)   # **EM CONSTRUCAO**
 #============================================#
 
+# selecionar rep da atividade pesqueira
+base_pesca <- base_representantes[base_representantes$categoria1=="Atividade Pesqueira",]
+pesca_names <- data.frame(codename = str_replace_all(base_pesca$nome_consel, " ", "_"))
+
+# selecionar codificacoes da atividade pesqueira
+pesca_codes <- merge(pesca_names, coding_table, by = "codename")
+
+# contagem por reuniao
+table(pesca_codes$filename)
+
+
 # Return a data frame which indicates what codes are associated with each file.
-#The result is a data frame. Each row represents one file, and each variable represents one code. If a
-#file is coded by a code, the value of that variable is 1, otherwise it is 0.
-filesByCodes(codingTable = c("coding", "coding2"))
+# The result is a data frame. Each row represents one file, and each variable represents one code. If a
+# file is coded by a code, the value of that variable is 1, otherwise it is 0.
+filesByCodes(codingTable = c("severino_antonio_dos_santos" ))
+filesCodedByOr(codingTable = c("severino_antonio_dos_santos" ))
 
 # Get files coded by specific codes, by specifying the code IDs
-filesCodedByAnd(cid = 24, codingTable=c("coding"))
+filesCodedByAnd(cid = 79, codingTable=c("coding"))
 
 # visualizar ids dos arquivos
 getFileIds()
@@ -446,7 +449,8 @@ getFileNames(fid = getFileIds())
 # codificar termos de destaque
 codingBySearch("Mangue",fid=getFileIds(),cid=50)
 codingBySearch("Pesca",fid=getFileIds(),cid=64)
-codingBySearch("Turismo",fid=getFileIds(),cid=65)
+
+codingBySearch("da APA do ponto",fid=getFileIds(),cid=154)
 
 #---- analise ----#
 
